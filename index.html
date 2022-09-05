@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        *{
+            margin: 0; padding: 0;
+        }
+        /*CSS언어*/
+        #ggm /*셀렉터*/{
+            background-color: rgb(3, 204, 204);
+            color: rgb(255, 0, 111);
+            width: 100px;
+            height: 100px;
+        }
+        /*태그 선택자, 클래스 선택자, id선택자*/
+        .box {
+            background-color: red;
+            color: white;
+            width: 100px;
+            height: 100px;
+            padding: 10px;
+            box-sizing: border-box;
+            transition: width 1s;
+        }
+        .box.on{
+            font-size: 30px;
+            width: 300px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="box ">
+        디브
+    </div>
+    <br><br><br><br>
+    <button id = "btn">
+        클릭
+    </button>
+    <button id = "bt">
+        클릭
+    </button>
+    
+    <script src="app.js">
+    </script>
+</body>
+</html>
