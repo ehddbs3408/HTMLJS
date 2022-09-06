@@ -1,3 +1,5 @@
+import {GG,GGM} from "./Person.js";
+
 const canvas = document.querySelector("#gameCavas");
 const ctx = canvas.getContext("2d");
 
@@ -17,7 +19,7 @@ document.addEventListener("keyup",e => {
 
 function Update()
 {   
-    console.log(playerX,playerY);
+
     if(keyArr[37] == true && playerX > 0)
     {
         playerX -=speed / 60;
@@ -50,3 +52,31 @@ let gameLoop = setInterval(()=>{
     Update();
     Render();
 },1000/60);
+
+
+
+
+// function GGM(name,age)
+// {
+//     this.name = name
+//     this.age = age;
+
+// }
+
+GGM.prototype.introduce = function()
+{
+    console.log(`하이 나는${this.name}임 ㅅㄱ 나이는 ${this.age}살임 `);
+}
+
+let obj = new GGM("와아아아아",1);
+let obj2 = new GGM("박",2);
+obj2.introduce = function()
+{
+    console.log(`qusrud`);
+}
+
+let msg = "Hello";
+String.prototype.GGM = function()
+{
+    console.log("안녕 GGm");
+}
