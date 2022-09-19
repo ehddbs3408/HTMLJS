@@ -7,21 +7,15 @@ class App {
         this.bulletList = [];
         this.canvas = document.querySelector(selector);
         this.ctx = (_a = this.canvas) === null || _a === void 0 ? void 0 : _a.getContext("2d");
+        this.ctx.font = "30px Arial";
         let playerImage = new Image();
         playerImage.src = "./dist/Image/Player.png";
         this.player = new Player(200, 200, 45, 45, 150, playerImage);
         //bullet
-        let bulletImage = new Image();
-        bulletImage.src = "./dist/Image/CircleBullet.png";
-        for (let i = 0; i < 30; i++) {
-            let b;
-            let pos = this.getRandomPositionInScreen();
-            b = new Bullet(pos.x, pos.y, 15, 15, 100, bulletImage);
-            let bulletcenter = b.rect.center;
-            let playercenter = this.player.rect.center;
-            b.setDirection(new Vector2(playercenter.x - bulletcenter.x, playercenter.y - bulletcenter.y).normalize);
-            this.bulletList.push(b);
-        }
+        this.bulletImage = new Image();
+        this.bulletImage.src = "./dist/Image/CircleBullet.png";
+        this.bulletFireTime = 0;
+        this.bulletCount = 10;
         this.loop();
     }
     loop() {
@@ -34,13 +28,31 @@ class App {
     update(dt) {
         this.player.update(dt);
         this.bulletList.forEach(x => x.update(dt));
+        this.bulletFireTime += dt;
+        if (this.bulletFireTime > 5) {
+            this.FireBullet(dt, this.bulletCount);
+        }
         //5초 시간이 지날수록 총알 수가 하나씩 늘어나도록 해주고
         // 화면 횐쪽 상단에 현재 총알수와 현재 시간이 표기되도록
     }
     reder() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.fillText("a", 10, 50);
         this.player.reder(this.ctx);
         this.bulletList.forEach(x => x.reder(this.ctx));
+    }
+    FireBullet(dt, count) {
+        this.bulletFireTime = 0;
+        for (let i = 0; i < count; i++) {
+            let b;
+            let pos = this.getRandomPositionInScreen();
+            b = new Bullet(pos.x, pos.y, 15, 15, 100, this.bulletImage);
+            let bulletcenter = b.rect.center;
+            let playercenter = this.player.rect.center;
+            b.setDirection(new Vector2(playercenter.x - bulletcenter.x, playercenter.y - bulletcenter.y).normalize);
+            this.bulletList.push(b);
+        }
+        this.bulletCount++;
     }
     getRandomPositionInScreen() {
         let index = Math.floor(Math.random() * 4);
