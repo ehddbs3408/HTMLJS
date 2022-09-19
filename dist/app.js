@@ -1,81 +1,156 @@
 import { Bullet } from "./Bullet.js";
+import { Buttom } from "./Button.js";
 import { Player } from "./Player.js";
 import { Vector2 } from "./Vector2.js";
-class App {
+export class App {
     constructor(selector) {
-        var _a;
         this.bulletList = [];
+        this.time = 0;
+        this.levelTimer = 0;
+        this.gameOver = false;
+        this.mousePos = new Vector2(0, 0);
         this.canvas = document.querySelector(selector);
-        this.ctx = (_a = this.canvas) === null || _a === void 0 ? void 0 : _a.getContext("2d");
-        this.ctx.font = "30px Arial";
+        this.ctx = this.canvas.getContext("2d");
         let playerImage = new Image();
-        playerImage.src = "./dist/Image/Player.png";
-        this.player = new Player(200, 200, 45, 45, 150, playerImage);
-        //bullet
+        playerImage.src = "./dist/image/Player.png";
+        //이거 이렇게 하면 나중에 오류 생긴다.
+        this.player = new Player(200, 200, 45, 35, 150, playerImage);
         this.bulletImage = new Image();
-        this.bulletImage.src = "./dist/Image/CircleBullet.png";
-        this.bulletFireTime = 0;
-        this.bulletCount = 10;
+        this.bulletImage.src = "./dist/image/CircleBullet.png";
+        for (let i = 0; i < 30; i++) {
+            let b = this.makeBullet();
+            this.bulletList.push(b);
+        }
+        this.canvas.addEventListener("mousemove", e => {
+            let { offsetX, offsetY } = e;
+            this.mousePos.x = offsetX;
+            this.mousePos.y = offsetY;
+        });
+        this.canvas.addEventListener("click", e => {
+            this.restartBtn.checkClick();
+        });
+        this.restartBtn = new Buttom(this.canvas.width / 2 - 60, 300, 120, 60, "ReStart", () => {
+            //게임 재시작 함수 실행
+            //종요시에 환면 가운데에 현재 버틴 시간 나오게
+        });
         this.loop();
     }
     loop() {
-        const dt = 1 / 60; //1/60초를 델타타임으로 고정
+        const dt = 1 / 60; // 1/60초를 델타타임으로 고정해서 넣는다.
         setInterval(() => {
             this.update(dt);
-            this.reder();
+            this.render();
         }, 1000 / 60);
     }
     update(dt) {
+        if (this.gameOver)
+            return;
         this.player.update(dt);
         this.bulletList.forEach(x => x.update(dt));
-        this.bulletFireTime += dt;
-        if (this.bulletFireTime > 5) {
-            this.FireBullet(dt, this.bulletCount);
+        this.bulletList.forEach(x => {
+            if (x.isOutofScreen(this.canvas.width, this.canvas.height)) {
+                let pos = this.getRandomPositionInScreen();
+                x.rect.pos = pos;
+                let dir = this.getToPlayerDirection(x);
+                x.reset(pos, dir);
+            }
+        });
+        this.time += dt;
+        this.levelTimer += dt;
+        this.checkLevel();
+        this.checkCollision();
+    }
+    checkCollision() {
+        // let isCol: boolean = 
+        //     this.bulletList.filter(
+        //         x => x.collider.checkCollision(this.player.collider)).length >= 1;
+        let isCol = false;
+        this.bulletList.forEach(x => {
+            if (x.collider.checkCollision(this.player.collider)) {
+                isCol = true;
+            }
+        });
+        if (isCol) {
+            console.log("Boom!");
+            this.gameOver = true;
         }
-        //5초 시간이 지날수록 총알 수가 하나씩 늘어나도록 해주고
-        // 화면 횐쪽 상단에 현재 총알수와 현재 시간이 표기되도록
     }
-    reder() {
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        this.ctx.fillText("a", 10, 50);
-        this.player.reder(this.ctx);
-        this.bulletList.forEach(x => x.reder(this.ctx));
-    }
-    FireBullet(dt, count) {
-        this.bulletFireTime = 0;
-        for (let i = 0; i < count; i++) {
-            let b;
-            let pos = this.getRandomPositionInScreen();
-            b = new Bullet(pos.x, pos.y, 15, 15, 100, this.bulletImage);
-            let bulletcenter = b.rect.center;
-            let playercenter = this.player.rect.center;
-            b.setDirection(new Vector2(playercenter.x - bulletcenter.x, playercenter.y - bulletcenter.y).normalize);
+    checkLevel() {
+        if (this.levelTimer >= 5) {
+            this.levelTimer = 0;
+            let b = this.makeBullet();
             this.bulletList.push(b);
         }
-        this.bulletCount++;
+    }
+    makeBullet() {
+        let pos = this.getRandomPositionInScreen();
+        let b = new Bullet(pos.x, pos.y, 15, 15, 100, this.bulletImage);
+        b.setDirection(this.getToPlayerDirection(b)); //플레이어 방향으로 진행하도록 한다.
+        return b;
+    }
+    render() {
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.player.render(this.ctx);
+        this.bulletList.forEach(x => x.render(this.ctx));
+        this.renderUI();
+    }
+    renderUI() {
+        let uiX = 10;
+        let uiY = 10;
+        this.ctx.save();
+        this.ctx.font = "15px Arial";
+        this.ctx.textBaseline = "top";
+        this.ctx.fillText(`현재 탄환 수 : ${this.bulletList.length}`, uiX, uiY);
+        this.ctx.fillText(`버틴 시간 : ${this.time.toFixed(2)}`, uiX, uiY + 20);
+        this.ctx.strokeStyle = "#000";
+        let gagueX = this.canvas.width - 100;
+        this.ctx.strokeRect(gagueX, uiY, 90, 15);
+        this.ctx.fillStyle = "#61ed22";
+        let width = this.levelTimer / 5 * 88;
+        this.ctx.fillRect(gagueX + 1, uiY + 1, width, 13);
+        this.ctx.restore();
+        if (this.gameOver) {
+            this.ctx.fillStyle = 'rgba(0,0,0,0.3)';
+            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+            this.ctx.fillStyle = "#fff";
+            this.ctx.font = "50px Arial";
+            this.ctx.textAlign = "center";
+            this.ctx.textBaseline = "bottom";
+            this.ctx.fillText("Game Over", this.canvas.width / 2, 300);
+            this.restartBtn.render(this.ctx);
+        }
     }
     getRandomPositionInScreen() {
-        let index = Math.floor(Math.random() * 4);
-        let x, y;
-        if (index == 0) {
-            x = Math.floor(Math.random() * this.canvas.width);
-            y = -30;
-        }
-        else if (index == 1) {
-            x = -30;
-            y = Math.floor(Math.random() * this.canvas.height);
-        }
-        else if (index == 2) {
-            x = this.canvas.width;
-            y = Math.floor(Math.random() * this.canvas.height);
-        }
-        else {
-            x = Math.floor(Math.random() * this.canvas.width);
-            y = this.canvas.height;
+        let idx = Math.floor(Math.random() * 4); // 0, 1, 2, 3
+        // 0은 위쪽, 1은 왼쪽, 2는 오른쪽, 3은 아래쪽에서 나오도록 코드를 작성하면 되고
+        let x = 0;
+        let y = 0;
+        switch (idx) {
+            case 0:
+                x = Math.random() * this.canvas.width;
+                y = -30;
+                break;
+            case 1:
+                x = -30;
+                y = Math.random() * this.canvas.height;
+                break;
+            case 2:
+                x = this.canvas.width + 30;
+                y = Math.random() * this.canvas.height;
+                break;
+            case 3:
+                x = Math.random() * this.canvas.width;
+                y = this.canvas.height + 30;
+                break;
         }
         return new Vector2(x, y);
     }
+    getToPlayerDirection(bullet) {
+        let pc = this.player.rect.center; //플레이어 중앙값
+        let bc = bullet.rect.center;
+        return new Vector2(pc.x - bc.x, pc.y - bc.y).normalize;
+    }
 }
 window.addEventListener("load", () => {
-    let app = new App("#gameCanvas");
+    App.instance = new App("#gameCanvas");
 });
