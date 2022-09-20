@@ -1,3 +1,4 @@
+import { App } from "./app.js";
 import { Collider } from "./Collieder.js";
 import { GameObject } from "./Gameobject.js";
 import { Rect } from "./Rect.js";
@@ -21,7 +22,9 @@ export class Bullet extends GameObject {
     render(ctx) {
         const { x, y, width, height } = this.rect;
         ctx.drawImage(this.img, x, y, width, height);
-        this.collider.render(ctx);
+        if (App.debug) {
+            this.collider.render(ctx);
+        }
     }
     isOutofScreen(width, height) {
         if (this.lifeTime < 1)

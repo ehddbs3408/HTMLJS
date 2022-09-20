@@ -1,3 +1,4 @@
+import { App } from "./app.js";
 import { Collider } from "./Collieder.js";
 import { GameObject } from "./Gameobject.js";
 import { Rect } from "./Rect.js";
@@ -34,6 +35,8 @@ export class Player extends GameObject {
     render(ctx) {
         let { x, y, width, height } = this.rect;
         ctx.drawImage(this.img, x, y, width, height);
-        this.collider.render(ctx);
+        if (App.debug) {
+            this.collider.render(ctx);
+        }
     }
 }

@@ -1,10 +1,12 @@
 import { Bullet } from "./Bullet.js";
 import { Buttom } from "./Button.js";
 import { Player } from "./Player.js";
+import { Rect } from "./Rect.js";
 import { Vector2 } from "./Vector2.js";
 
 export class App {
     static instance:App;
+    static debug:boolean = false;
     private canvas: HTMLCanvasElement;
     private ctx: CanvasRenderingContext2D;
 
@@ -52,9 +54,24 @@ export class App {
         this.restartBtn = new Buttom(this.canvas.width/2 -60,300,120,60,"ReStart",()=>{
             //게임 재시작 함수 실행
             //종요시에 환면 가운데에 현재 버틴 시간 나오게
+            this.gameStart();
         });
-
+        this.gameStart();
         this.loop();
+    }
+    gameStart() : void
+    {
+        this.gameOver = false;
+        this.player.rect.pos = new Vector2(200,200);
+        this.time = 0;
+        this.levelTimer = 0;
+        this.bulletList =[];
+        for(let i = 0;i<30;i++)
+        {
+            let b : Bullet =this.makeBullet();
+            this.bulletList.push(b);
+        }
+
     }
     loop(): void {
         const dt = 1 / 60; // 1/60초를 델타타임으로 고정해서 넣는다.
@@ -159,7 +176,7 @@ export class App {
             this.ctx.textAlign = "center";
             this.ctx.textBaseline ="bottom";
             this.ctx.fillText("Game Over",this.canvas.width/2,300);
-
+            this.ctx.fillText(`${this.time.toFixed(2)}`, this.canvas.width / 2, 500);
             this.restartBtn.render(this.ctx);
         }
     }

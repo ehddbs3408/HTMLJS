@@ -22,6 +22,8 @@ export class Collider
         let { x, y, width, height} = this.getCollisionRect();
         ctx.strokeRect(x, y, width, height);
         ctx.restore();
+
+        
     }
 
     getCollisionRect(): Rect {

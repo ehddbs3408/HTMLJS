@@ -32,8 +32,21 @@ export class App {
         this.restartBtn = new Buttom(this.canvas.width / 2 - 60, 300, 120, 60, "ReStart", () => {
             //게임 재시작 함수 실행
             //종요시에 환면 가운데에 현재 버틴 시간 나오게
+            this.gameStart();
         });
+        this.gameStart();
         this.loop();
+    }
+    gameStart() {
+        this.gameOver = false;
+        this.player.rect.pos = new Vector2(200, 200);
+        this.time = 0;
+        this.levelTimer = 0;
+        this.bulletList = [];
+        for (let i = 0; i < 30; i++) {
+            let b = this.makeBullet();
+            this.bulletList.push(b);
+        }
     }
     loop() {
         const dt = 1 / 60; // 1/60초를 델타타임으로 고정해서 넣는다.
@@ -117,6 +130,7 @@ export class App {
             this.ctx.textAlign = "center";
             this.ctx.textBaseline = "bottom";
             this.ctx.fillText("Game Over", this.canvas.width / 2, 300);
+            this.ctx.fillText(`${this.time.toFixed(2)}`, this.canvas.width / 2, 500);
             this.restartBtn.render(this.ctx);
         }
     }
@@ -151,6 +165,7 @@ export class App {
         return new Vector2(pc.x - bc.x, pc.y - bc.y).normalize;
     }
 }
+App.debug = false;
 window.addEventListener("load", () => {
     App.instance = new App("#gameCanvas");
 });
