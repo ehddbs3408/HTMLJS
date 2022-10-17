@@ -17,7 +17,29 @@
 
         const btn = document.querySelector("#btnSend");
         btn.addEventListener("click",e=>{
+            let req = new XMLHttpRequest();
 
+            let username = nameInput.value;
+            let level = levelInput.value;
+            console.log(`/record?username=${username}&level=${level}`);
+
+            req.addEventListener("readystatechange",()=>{
+                if(req.readyState == XMLHttpRequest.DONE)
+                {
+                    const result = req.responseText;
+                    console.log(result);
+                }
+            });
+
+            // let form = new FormData();
+            // form.append("username",username);
+            // form.append("level",level);
+            
+            req.setRequestHeader("Content-tye","application/json");
+            req.open("POST",`/record`);
+
+            
+            req.send(JSON.stringify({username,level}));
         });
     </script>
 </body>
