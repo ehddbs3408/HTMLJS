@@ -41,7 +41,7 @@
             padding:40px 40px;
             grid-template-rows: 1fr, 1fr;
             gap:10px;
-            position: relative;
+            position:relative;
         }
         #popup > .inner > .name {
             outline: none;
@@ -49,6 +49,7 @@
             border-radius: 5px;
             padding:0px 12px;
             font-size: 16px;
+
         }
         #popup > .inner > .btn 
         {
@@ -59,12 +60,12 @@
             border-radius: 5px;
             cursor: pointer;
         }
-        #popup > .inner > #close
+        #popup>.inner > #close
         {
             position: absolute;
             top: 10px;
             right: 20px;
-            font-size : 20px;
+            font-size: 20px;
             cursor: pointer;
         }
     </style>
@@ -75,7 +76,7 @@
         <div class="inner">
             <input type="text" class="name" placeholder="이름을 입력">
             <button class="btn">Send</button>
-            <div id = "close">X</div>
+            <div id="close">X</div>
         </div>
     </div>
     <div id="ggm"></div>
