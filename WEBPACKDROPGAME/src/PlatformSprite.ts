@@ -43,4 +43,11 @@ export default class PlatformSprite extends Phaser.GameObjects.RenderTexture
         this.setSize(width,height);;
         this.body.setSize(width,height);
     }
+
+    explodeAnDestroy():void
+    {
+        this.clearTint();
+        this.isHeroOnIt = false;
+        this.canLandOnIt = false;
+    }
 }
