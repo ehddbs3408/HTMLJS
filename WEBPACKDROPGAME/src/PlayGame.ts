@@ -3,6 +3,7 @@ import PlayerSprite from './PlayerSprite';
 import { GameOption } from './GameOption';
 import PlatformSprite from './PlatformSprite';
 import GameObject =Phaser.GameObjects.GameObject;
+import { text } from 'body-parser';
 
 export class PlayGameScene extends Phaser.Scene {
 
@@ -19,6 +20,14 @@ export class PlayGameScene extends Phaser.Scene {
     platformGroup : Phaser.Physics.Arcade.Group;
 
     actionCam : Phaser.Cameras.Scene2D.Camera;
+    paricles : Phaser.GameObjects.Particles.ParticleEmitterManager;
+    emitter : Phaser.GameObjects.Particles.ParticleEmitter;
+
+    levelText : Phaser.GameObjects.BitmapText;
+    level:number;
+    gameOver : boolean;
+    gameOverText : Phaser.GameObjects.BitmapText;
+
 
     constructor()
     {
@@ -26,11 +35,16 @@ export class PlayGameScene extends Phaser.Scene {
     }
 
     create() {
+        this.level = 0;
+        this.gameOver = false;
+        
         this.gameWidth = this.game.config.width as number;
         this.gameHeigth = this.game.config.height as number;
         this.addSky();
         this.eyes = this.add.sprite(0,0,'eyes');
         this.eyes.setVisible(false);
+        
+        
         
         this.borderGraphics = this.add.graphics();
         this.borderGraphics.setVisible(false);
@@ -50,7 +64,35 @@ export class PlayGameScene extends Phaser.Scene {
         this.player = new PlayerSprite(this,this.gameWidth * 0.5,0,'hero');
         
         this.input.on("pointerdown",this.destroyPlatform,this);
+
+        this.levelText = this.add.bitmapText(this.gameWidth -150,10,'myFont',"0",50);
+        this.levelText.setOrigin(1,0);
+
+        this.gameOverText = this.add.bitmapText(this.gameWidth * 0.5,this.gameHeigth * 0.5,'myFont',"Game\n Over",200);
+        this.gameOverText.setOrigin(0.5,0.5);
+        this.gameOverText.setVisible(false);
+
+        this.createEmitter();//파티클 시스템
         this.setCamera();
+    }
+
+    createEmitter() :void
+    {
+        this.paricles = this.add.particles('particle');
+        this.emitter = this.paricles.createEmitter({
+            scale:{
+                start:1,
+                end:0
+            },
+            speed:{
+                min:0,
+                max:200
+            },
+            active:false,
+            lifespan:1000,
+            quantity:50,
+            
+        });
     }
 
     setCamera():void
@@ -61,7 +103,7 @@ export class PlayGameScene extends Phaser.Scene {
             0,0.5, //xLerp , yLerp
             0, -(this.gameHeigth * 0.5 -this.gameHeigth * GameOption.firstPlatformPosition)); //
 
-        this.cameras.main.ignore([this.player]);
+        this.cameras.main.ignore([this.player,this.paricles]);
         this.cameras.main.ignore(this.platformGroup);
         if(this.physics.world.debugGraphic != null)
         {
@@ -81,8 +123,12 @@ export class PlayGameScene extends Phaser.Scene {
 
             let p : PlatformSprite = closePlatform.gameObject as PlatformSprite;
 
-            p.explodeAnDestroy();
+            p.explodeAnDestroy(this.emitter);
             this.initPlatform(p);
+        }
+        else if(this.gameOver == true)
+        {
+            this.scene.start("Playgame");
         }
     }
 
@@ -152,6 +198,13 @@ export class PlayGameScene extends Phaser.Scene {
         let pList : PlatformSprite[] = this.platformGroup.getChildren() as PlatformSprite[];
 
         pList.forEach(p => {
+            if(p.y + this.gameHeigth < this.player.y && this.gameOver == true)
+            {
+                this.displayGameOverScreen()
+                // this.scene.start("PlayGame");
+            }
+
+            
             let a:number = Math.abs(this.gameWidth * 0.5 - p.x);
             let b:number = this.gameWidth * 0.5;
             let distance :number = Math.max(0.2,1 - (a/b) * Math.PI * 0.5);
@@ -168,6 +221,10 @@ export class PlayGameScene extends Phaser.Scene {
                 p.assignedVelocity *= -1;
             }
         });
+    }
+    displayGameOverScreen():void
+    {
+        
     }
 
     handleCollision(body1:GameObject,body2:GameObject):void
@@ -200,7 +257,9 @@ export class PlayGameScene extends Phaser.Scene {
             platform.isHeroOnIt = true;
             platform.assignedVelocity = 0;
             player.canDestroyPlaform = true;
+            
             this.paintSafePlatforms();
+            //this.add
         }
     }
 
