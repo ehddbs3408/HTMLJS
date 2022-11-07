@@ -17,6 +17,10 @@ export default class PreloadAssetScene extends Phaser.Scene
             frameWidth:32,
             frameHeight:32,
         });
+        this.load.spritesheet('hero_run','assets/hero_run.png',{
+            frameWidth:32,
+            frameHeight:32,
+        });
     }
 
     create():void

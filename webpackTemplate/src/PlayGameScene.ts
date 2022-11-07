@@ -1,32 +1,79 @@
+import PlatformSprite from "./GameObject/PlatformSprite";
+import PlayerSprite from "./GameObject/PlayerSprite";
+import { GameOption } from "./GameOption";
+import { PlatformInitOption } from "./GameObject/PlatformSprite";
+
 export class PlayGameScene extends Phaser.Scene {
-    image: Phaser.GameObjects.Image;
+    player :PlayerSprite;
+
+    background : Phaser.GameObjects.TileSprite;
+
+    leftSprite : Phaser.GameObjects.Sprite;
+    rightSprite : Phaser.GameObjects.Sprite;
+    middleSprite : Phaser.GameObjects.Sprite;
+
+    platformGroup : Phaser.Physics.Arcade.Group;
 
     constructor()
     {
         super("PlayGameScene");
     }
 
-    preload() {
-        this.load.image('logo', 'assets/logo.png');
-    }
     create() {
-        this.image = this.add.image(400, 300, 'logo');
-        //this.image.setScale(0.1);
-    }
-    update(time: number, delta:number) {
-        this.image.rotation += 15 * delta * 0.0001;
-    }
-}
-let scaleObject: Phaser.Types.Core.ScaleConfig = {
-    mode: Phaser.Scale.FIT,
-    autoCenter: Phaser.Scale.CENTER_BOTH,
-    parent:'theGame',
-    width:320,
-    height:320,
-}
+        this.setBackground();
 
-let config = {
-    type: Phaser.AUTO,
-    scale: scaleObject,
-    scene: PlayGameScene
-};
+        this.leftSprite = this.add.sprite(0,0,"leftplatform");
+        this.leftSprite.setOrigin(0,0);
+        this.leftSprite.setVisible(false);
+
+        this.rightSprite = this.add.sprite(0,0,"rightplatform");
+        this.rightSprite.setOrigin(1,0);
+        this.rightSprite.setVisible(false);
+
+        this.middleSprite = this.add.sprite(0,0,"platform")
+        this.middleSprite.setOrigin(0,0);
+        this.middleSprite.setVisible(false);
+
+        this.platformGroup = new Phaser.Physics.Arcade.Group(this.physics.world,this);
+
+        let option:PlatformInitOption = {
+            x:200,y:200,width:50
+        }
+
+        let p = new PlatformSprite(this,this.platformGroup,
+            this.leftSprite,
+            this.rightSprite,
+            this.middleSprite,
+            option);
+
+        this.platformGroup.add(p);
+
+        this.player = new PlayerSprite(this);
+        
+    }
+
+    handleCollision(body1:Phaser.GameObjects.GameObject,body2:Phaser.GameObjects.GameObject) : void
+    {
+        let player :PlayerSprite = body1 as PlayerSprite;
+        let platform: PlatformSprite = body2 as PlatformSprite;
+
+        console.log("플레이어 착지");
+        
+    }
+
+    update(time: number, delta:number) 
+    {
+        this.physics.world.collide(this.player,this.platformGroup,this.handleCollision,undefined,this);
+    }
+
+    setBackground() : void
+    {
+        this.background = this.add.tileSprite(0,0,
+            GameOption.gameSize.width / GameOption.pixelScale,
+            GameOption.gameSize.height / GameOption.pixelScale,
+            'background');
+        
+        this.background.setOrigin(0,0);
+        this.background.scale = GameOption.pixelScale;
+    }
+}
