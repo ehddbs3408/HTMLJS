@@ -1,18 +1,19 @@
-import PlatformSprite from "./GameObject/PlatformSprite";
+import EnemtGroup from "./EnemyGroup";
+import EnemySrite from "./EnemySprite";
+import PlatformGroup from "./GameObject/PlatformGroup";
+import PlatformSprite, { PlatformInitOption } from "./GameObject/PlatformSprite";
 import PlayerSprite from "./GameObject/PlayerSprite";
 import { GameOption } from "./GameOption";
-import { PlatformInitOption } from "./GameObject/PlatformSprite";
+import PlatformSpriteLoader, {SpriteSet} from "./PlatFormLoader"
+import EnemyGroup from "./EnemyGroup";
 
-export class PlayGameScene extends Phaser.Scene {
-    player :PlayerSprite;
+export default class PlayGameScene extends Phaser.Scene {
+    
+    player: PlayerSprite;
+    background: Phaser.GameObjects.TileSprite;
 
-    background : Phaser.GameObjects.TileSprite;
-
-    leftSprite : Phaser.GameObjects.Sprite;
-    rightSprite : Phaser.GameObjects.Sprite;
-    middleSprite : Phaser.GameObjects.Sprite;
-
-    platformGroup : Phaser.Physics.Arcade.Group;
+    platformGroup: PlatformGroup;
+    enemyGroup : EnemtGroup;
 
     constructor()
     {
@@ -22,58 +23,123 @@ export class PlayGameScene extends Phaser.Scene {
     create() {
         this.setBackground();
 
-        this.leftSprite = this.add.sprite(0,0,"leftplatform");
-        this.leftSprite.setOrigin(0,0);
-        this.leftSprite.setVisible(false);
+        let {leftSprite : l,rightSprite:r,middleSprite:m} = PlatformSpriteLoader(this);
 
-        this.rightSprite = this.add.sprite(0,0,"rightplatform");
-        this.rightSprite.setOrigin(1,0);
-        this.rightSprite.setVisible(false);
+        this.platformGroup = new PlatformGroup(this.physics.world, this);
+        this.enemyGroup = new EnemyGroup(this.physics.world,this,this.platformGroup);
 
-        this.middleSprite = this.add.sprite(0,0,"platform")
-        this.middleSprite.setOrigin(0,0);
-        this.middleSprite.setVisible(false);
-
-        this.platformGroup = new Phaser.Physics.Arcade.Group(this.physics.world,this);
-
-        let option:PlatformInitOption = {
-            x:200,y:200,width:50
+        for(let i = 0;i<10;i++)
+        {
+            let option:PlatformInitOption = this.platformGroup.getPlatformInitOption(i == 0);
+            let p = new PlatformSprite(this, this.platformGroup, l, r, m, option);
+            if(i>0)
+            {
+                this.placeOnPlatform(p);
+            }
         }
 
-        let p = new PlatformSprite(this,this.platformGroup,
-            this.leftSprite,
-            this.rightSprite,
-            this.middleSprite,
-            option);
-
-        this.platformGroup.add(p);
-
         this.player = new PlayerSprite(this);
-        
     }
 
-    handleCollision(body1:Phaser.GameObjects.GameObject,body2:Phaser.GameObjects.GameObject) : void
+    placeOnPlatform(p:PlatformSprite):void
     {
-        let player :PlayerSprite = body1 as PlayerSprite;
+        let e = new EnemySrite(this,p,this.enemyGroup);
+
+    }
+
+    handleCollision(body1:Phaser.GameObjects.GameObject, body2: Phaser.GameObjects.GameObject): void
+    {
+        let player: PlayerSprite = body1 as PlayerSprite;
         let platform: PlatformSprite = body2 as PlatformSprite;
 
         console.log("플레이어 착지");
-        
     }
 
-    update(time: number, delta:number) 
+    handleEnemyCollision(body1:Phaser.GameObjects.GameObject, body2: Phaser.GameObjects.GameObject) : void
     {
-        this.physics.world.collide(this.player,this.platformGroup,this.handleCollision,undefined,this);
+        let player = body1 as PlayerSprite;
+        let enemy = body2 as EnemySrite;
+
+        if(player.body.touching.down && enemy.body.touching.up)
+        {
+            enemy.anims.play("enemy_hit",true);
+            this.enemyGroup.groupToPool(enemy);
+
+            enemy.setFlipY(true);
+            player.setVelocityY(-400);
+        }
+        else
+        {
+            this.setGameOver();
+        }
+        console.log("Enemy!!");
     }
 
-    setBackground() : void
+    resetPlatform(platform:PlatformSprite) : void
     {
-        this.background = this.add.tileSprite(0,0,
-            GameOption.gameSize.width / GameOption.pixelScale,
-            GameOption.gameSize.height / GameOption.pixelScale,
-            'background');
         
-        this.background.setOrigin(0,0);
+        let option:PlatformInitOption = this.platformGroup.getPlatformInitOption(false);
+        platform.init(option);
+    }
+
+    startMove() : void
+    {
+        this.platformGroup.setVelocityY(-GameOption.platformSpeed);
+    }
+
+    update(time: number, delta:number) {
+        if(this.player.firstMove)
+        {
+            this.background.tilePositionY += 0.2;
+        }
+        
+        
+        this.physics.world.collide(this.player, this.platformGroup, this.handleCollision, undefined, this);
+        this.physics.world.collide(this.player,this.enemyGroup,this.handleEnemyCollision,undefined,this);
+        if(this.player.y > GameOption.gameSize.height || this.player.y < 0)
+        {
+            this.setGameOver();
+        }
+        let pList : PlatformSprite[] = this.platformGroup.getChildren() as PlatformSprite[];
+
+        pList.forEach(p =>{
+            let pBound = p.getBounds();
+            if(pBound.bottom < 0){
+                this.resetPlatform(p);
+            }
+        })
+
+        //Enemy
+        let enemies = this.enemyGroup.getChildren() as EnemySrite[];
+        enemies.forEach(e =>{
+            e.patrol();
+
+            let eBound = e.getBounds();
+            if(eBound.bottom < 0)
+            {
+                e.setVelocity(0,0);
+                e.body.setAllowGravity(false);
+                this.enemyGroup.groupToPool(e);
+                e.setVisible(false);
+            }
+        })
+    }
+
+
+
+    setBackground(): void 
+    {
+        this.background = this.add.tileSprite(
+            0, 0, 
+            GameOption.gameSize.width / GameOption.pixelScale, 
+            GameOption.gameSize.height / GameOption.pixelScale, 'background');
+        this.background.setOrigin(0, 0);
         this.background.scale = GameOption.pixelScale;
+    }
+
+    setGameOver() : void
+    {
+        this.scene.start("PlayGameScene");
+        this.events.off(Phaser.Scenes.Events.UPDATE);
     }
 }

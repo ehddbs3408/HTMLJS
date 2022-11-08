@@ -21,6 +21,16 @@ export default class PreloadAssetScene extends Phaser.Scene
             frameWidth:32,
             frameHeight:32,
         });
+
+        this.load.spritesheet('enemy','assets/enemy.png',{
+            frameWidth:36,
+            frameHeight:30
+        });
+
+        this.load.spritesheet('enemy_hit','assets/enemy_hit.png',{
+            frameWidth:36,
+            frameHeight:30
+        });
     }
 
     create():void

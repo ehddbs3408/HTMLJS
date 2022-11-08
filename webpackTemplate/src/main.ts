@@ -1,5 +1,5 @@
 import 'phaser';
-import { PlayGameScene } from './PlayGameScene';
+import PlayGameScene from './PlayGameScene';
 import PreloadAssetScene from './PreloadAssetScene'
 import { GameOption } from './GameOption';
 

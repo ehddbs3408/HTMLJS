@@ -1,6 +1,6 @@
 export const GameOption =
 {
-    gameSize:{
+    gameSize: {
         width:720,
         height:1280,
     },
@@ -9,7 +9,9 @@ export const GameOption =
     heroSpeed:300,
 
     platformSpeed:90,
-    platformRange:[150,250],
-    platformYDistance:[200,300],
-    platformXDistacne:[0,250],
+    platformRange:[150, 350],
+    platformYDistance:[200, 300],
+    platformXDistance:[0, 150], //화면 중앙으로부터 얼만큼 떨어져서 나올지
+
+    patrolSpeed:[40,80],
 }
