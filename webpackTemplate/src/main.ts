@@ -1,34 +1,30 @@
 import 'phaser';
-import PlayGameScene from './PlayGameScene';
-import PreloadAssetScene from './PreloadAssetScene'
-import { GameOption } from './GameOption';
-
-const {width,height} = GameOption.gameSize;
+import {GameOption} from "./GameOption"
+import PlayGameScene from './Scenes/PlayGameScene';
+import PreloadAssetScene from './Scenes/PreloadAssetScene';
 
 let scaleObject: Phaser.Types.Core.ScaleConfig = {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
     parent:'theGame',
-    width:width,
-    height:height,
+    width:GameOption.width,
+    height:GameOption.height,
 }
 
-let physicConfig :Phaser.Types.Core.PhysicsConfig = {
+let physicsConfig : Phaser.Types.Core.PhysicsConfig = {
     default:'arcade',
-    arcade: {
-        gravity:{
-            y:1200,
-        },
-        debug:true
+    arcade:{
+        debug:true,
+        gravity:{y:500}
     }
 }
 
-let config = {
+let config :Phaser.Types.Core.GameConfig = {
     type: Phaser.AUTO,
+    physics:physicsConfig,
     scale: scaleObject,
     scene: [PreloadAssetScene,PlayGameScene],
-    physics: physicConfig,
-    pixelArt:true,
-
+    pixelArt:true
 };
+
 new Phaser.Game(config);
