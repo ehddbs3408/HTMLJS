@@ -30,5 +30,6 @@ export default class MapManager
         this.collisions.setVisible(false);
 
         this.collisions.setCollisionByExclusion([-1],true);
+        
     }
 }
