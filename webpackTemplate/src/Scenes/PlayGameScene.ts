@@ -3,6 +3,13 @@ import MapManager from "../Core/MapManager";
 import Player from "../GameObjects/Player";
 import { GameOption } from "../GameOption";
 import { io, Socket } from "socket.io-client";
+import { addClientListener } from "../Network/ClientListener";
+import Session from "../Server/Session";
+
+interface RemotePlayerList
+{
+    [key:string] : Player;
+}
 
 export default class PlayGameScene extends Phaser.Scene
 {
@@ -10,6 +17,9 @@ export default class PlayGameScene extends Phaser.Scene
     player : Player;
 
     socket:Socket;
+    playerName:string;
+
+    remotePlayers:RemotePlayerList ={};
 
     constructor()
     {
@@ -23,23 +33,37 @@ export default class PlayGameScene extends Phaser.Scene
     create():void 
     {
         MapManager.Instance = new MapManager(this, "level1");
-        this.socket.on("position", data =>{
-            this.onComplateConnection(data.x,data.y);
-        });
-        this.socket.emit("enter","ehddbs");
+
+        addClientListener(this.socket,this);
+
+        this.playerName = "ehddbs";
+        this.socket.emit("enter",{name:this.playerName});
     }
 
     onComplateConnection(x:number,y:number):void
     {
-        this.createPlayer(x,y,200,350);
+        this.createPlayer(x,y,200,350,this.socket.id,false);
         this.cameraSetting();
     }
 
-    createPlayer(x:number,y:number, speed:number,jumpPower:number):void
+    //원격으로 진행하는 플레이어랑,내가 조종하는 플레이어
+    createPlayer(x:number,y:number, speed:number,jumpPower:number,id:string,isRemote:boolean):void
     {
-        this.player = new Player(this,x,y,"player",speed,jumpPower);
-
-        this.physics.add.collider(this.player,MapManager.Instance.collisions);
+        if(isRemote)
+        {
+            this.remotePlayers[id] = new Player(this,x,y,"player",speed,jumpPower,id,isRemote);
+        }else
+        {
+            this.player = new Player(this,x,y,"player",speed,jumpPower,id,isRemote);
+            this.physics.add.collider(this.player,MapManager.Instance.collisions);
+        }
+        
+    }
+    
+    removePlayer(key:string):void
+    {
+        this.remotePlayers[key].destroy();
+        delete this.remotePlayers[key];
     }
 
     cameraSetting():void

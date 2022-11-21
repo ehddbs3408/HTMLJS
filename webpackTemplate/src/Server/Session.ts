@@ -1,11 +1,11 @@
 import {Socket} from 'socket.io';
-import { Position } from '../Network/protocol';
+import { Position, SessionInfo } from '../Network/Protocol';
 
 export default class Session
 {
     socket:Socket;
     name:string;
-    position:Position;
+    position:Position = {x:0,y:0}
     id:string;
 
     constructor(socket:Socket)
@@ -27,6 +27,11 @@ export default class Session
 
     send(protocol:string,data:any):void
     {
+        this.socket.emit(protocol,data);
+    }
 
+    getSesstionInfo():SessionInfo
+    {
+        return {id:this.id,name:this.name,position:this.position};
     }
 }

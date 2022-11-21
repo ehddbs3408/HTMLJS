@@ -12,13 +12,19 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
     maxJumpCount :number = 2;
     currentJumpCount:number = 0;
 
-    constructor(scene:Phaser.Scene,x:number,y:number,key:string,speed:number,jumpPower:number)
+    //netWork
+    isRemoto:boolean = false;
+    id:string;
+
+    constructor(scene:Phaser.Scene,x:number,y:number,key:string,speed:number,jumpPower:number,id:string,isRemoto:boolean)
     {
         super(scene,x,y,key);
         scene.add.existing(this);
         scene.physics.add.existing(this);
         this.speed = speed;
         this.jumpPower = jumpPower;
+        this.id = id;
+        this.isRemoto = isRemoto;
         this.init();
 
         
@@ -27,10 +33,16 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
     init():void
     {
         this.setCollideWorldBounds(true);
-        this.cursorKey = this.scene.input.keyboard.createCursorKeys();
-
         InitPlayerAnimation(this.scene.anims);
-        this.scene.events.on(Phaser.Scenes.Events.UPDATE,this.update,this);
+
+        if(this.isRemoto == false)
+        {
+            this.cursorKey = this.scene.input.keyboard.createCursorKeys();
+            this.scene.events.on(Phaser.Scenes.Events.UPDATE,this.update,this);
+        }else
+        {
+            this.body.setAllowGravity(false);
+        }  
     }
 
     //오른쪽 왼쪽 방향만 dir받는다
