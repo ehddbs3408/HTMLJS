@@ -5,6 +5,9 @@ import { GameOption } from "../GameOption";
 import { io, Socket } from "socket.io-client";
 import { addClientListener } from "../Network/ClientListener";
 import Session from "../Server/Session";
+import { SessionInfo } from "../Network/Protocol";
+import SocketManager from "../Core/SocketManager";
+import ProjectilePool from "../GameObjects/Pools/ProjectilePool";
 
 interface RemotePlayerList
 {
@@ -16,33 +19,35 @@ export default class PlayGameScene extends Phaser.Scene
 
     player : Player;
 
-    socket:Socket;
     playerName:string;
 
     remotePlayers:RemotePlayerList ={};
 
+    syncTimer : number = 0;
+
     constructor()
     {
         super({key:"PlayGame"});
-        this.socket = io();
-        console.log(this.socket.io);
+        const socket = io();
         
-
+        SocketManager.Instance = new SocketManager(socket);
     }
 
     create():void 
     {
         MapManager.Instance = new MapManager(this, "level1");
 
-        addClientListener(this.socket,this);
+        //addClientListener(this.socket,this);
+        SocketManager.Instance.addProtocol(this);
+        ProjectilePool.Instance = new ProjectilePool(this);
 
         this.playerName = "ehddbs";
-        this.socket.emit("enter",{name:this.playerName});
+        SocketManager.Instance.sendData("enter",{name:this.playerName});
     }
 
     onComplateConnection(x:number,y:number):void
     {
-        this.createPlayer(x,y,200,350,this.socket.id,false);
+        this.createPlayer(x,y,200,350, SocketManager.Instance.socket.id,false);
         this.cameraSetting();
     }
 
@@ -73,5 +78,26 @@ export default class PlayGameScene extends Phaser.Scene
         this.cameras.main.setBounds(0,0,width + mapOffset,height);
         this.cameras.main.setZoom(cameraZoomFator);
         this.cameras.main.startFollow(this.player);
+    }
+
+    update(time: number, delta: number): void {
+        if(this.player == undefined) return;
+
+        //이건 좌표를 저장해두고 이전좌표와 현재좌표의 거리가 0.1 미만이면 그냥 안보내고 , 만약 변했다면 그때 보낸다.
+        this.syncTimer += delta; //1000이 1초
+        if(this.syncTimer >= 50)
+        {
+            this.syncTimer = 0;
+            let playerInfo : SessionInfo = {
+                id:SocketManager.Instance.socket.id,
+                name:this.playerName,
+                position:{x:this.player.x,y:this.player.y},
+                filpX:this.player.flipX,
+                isMoving:this.player.isMoving()
+            };
+
+            SocketManager.Instance.sendData("info_sync",playerInfo);
+        }
+
     }
 }

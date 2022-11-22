@@ -25,16 +25,20 @@ export const addServerListener = (socket:Socket,session:Session) =>
         SessionManager.Instance.broadcast("enter_player",session.getSesstionInfo(),socket.id,true);
      });
 
-     socket.on("disconnect",(reason:string)=>{
-        SessionManager.Instance.removeSession(socket.id);
-        console.log(`${session.name} (${socket.id}) is disconnects`);
-        
-        //여기서 접속한 모든 사용자에게 해당 유저가 떠났음을 알려줘야한다.
+     socket.on("info_sync",data=>{
+        let info = data as SessionInfo;
+
+        //해당 세션이 존재하면 인포 셋팅한다.
+        SessionManager.Instance.getSession(info.id)?.setInfo(info);
      });
 
-     socket.on("leave_player",data =>{
-        
-     });
+     socket.on("disconnect", (reason:string) => {
+        SessionManager.Instance.removeSession(socket.id);
+        console.log(`${session.name} ( ${socket.id} ) is disconnected`);
+
+        //여기서 접속한 모든 사용자에게 해당 유저가 떠났음을 알려줘야 한다.
+        SessionManager.Instance.broadcast("leave_player",session.getSesstionInfo(), socket.id, true);
+    });
 
      //클라이언트가 disconnection되며누 
      //leave_player 라는 메세지와 함께 sessioninfo가 넘아오도록 민들어

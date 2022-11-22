@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import InitPlayerAnimation from "../Animations/PlayerAnimation";
+import { SessionInfo } from "../Network/Protocol";
 
 export default class Player extends Phaser.Physics.Arcade.Sprite
 {
@@ -39,10 +40,17 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
         {
             this.cursorKey = this.scene.input.keyboard.createCursorKeys();
             this.scene.events.on(Phaser.Scenes.Events.UPDATE,this.update,this);
+
+            this.scene.input.keyboard.on("keydown-Q",this.fireIceball,this);
         }else
         {
             this.body.setAllowGravity(false);
         }  
+    }
+
+    fireIceball():void
+    {
+        console.log("발사");
     }
 
     //오른쪽 왼쪽 방향만 dir받는다
@@ -58,6 +66,26 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
         {
             this.setVelocityY(-this.jumpPower);
         }
+    }
+
+    setInfoSync(info:SessionInfo):void
+    {
+        this.x = info.position.x;
+        this.y = info.position.y;
+        this.setFlipX(info.filpX);
+
+        if(info.isMoving)
+        {
+            this.play("run",true);
+        }else
+        {
+            this.play("idle",true);
+        }
+    }
+
+    isMoving():boolean
+    {
+        return this.body.velocity.length() > 0.1;//이동중
     }
 
     update(time:number,delta:number):void

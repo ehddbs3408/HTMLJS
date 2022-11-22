@@ -19,6 +19,16 @@ export default class PreloadAssetScene extends Phaser.Scene
             frameHeight:38,
             spacing:32
         });
+
+        //플레이어 공격모션
+        this.load.spritesheet("player_throw","assets/player/throw_attack_sheet_1.png",{
+            frameWidth:32,
+            frameHeight:38,
+            spacing:32
+        });
+
+        //투사체이미지
+        this.load.image("iceball","assets/weapons/iceball_001.png");
     }
 
     create(): void 

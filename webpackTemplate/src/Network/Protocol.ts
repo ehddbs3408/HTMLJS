@@ -9,6 +9,8 @@ export interface SessionInfo
     id:string;
     name:string;
     position:Position;
+    filpX:boolean;
+    isMoving:boolean;
 }
 
 export interface PlayerList

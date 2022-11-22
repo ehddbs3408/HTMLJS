@@ -21,4 +21,20 @@ export const addClientListener = (socket:Socket,scene:PlayGameScene) =>{
             scene.createPlayer(p.position.x,p.position.y,200,350,p.id,true);
         })
     })
+
+    socket.on("leave_player", data => {
+        let playerList = data as SessionInfo;
+        scene.removePlayer(data.id);
+    });
+    
+    socket.on("info_sync",data=>{
+        let plist = data as PlayerList;
+
+        plist.list.forEach((p:SessionInfo) => {
+            if(p.id == socket.id) return;
+
+            scene.remotePlayers[p.id]?.setInfoSync(p);
+            
+        })
+    });
 };

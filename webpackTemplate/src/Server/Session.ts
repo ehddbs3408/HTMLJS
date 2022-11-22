@@ -7,6 +7,8 @@ export default class Session
     name:string;
     position:Position = {x:0,y:0}
     id:string;
+    filpX:boolean = false;
+    isMoving:boolean = false;
 
     constructor(socket:Socket)
     {
@@ -32,6 +34,14 @@ export default class Session
 
     getSesstionInfo():SessionInfo
     {
-        return {id:this.id,name:this.name,position:this.position};
+        return {id:this.id,name:this.name,position:this.position,filpX:this.filpX,isMoving:this.isMoving};
+    }
+
+    setInfo(info:SessionInfo):void
+    {
+        this.setPosition(info.position);
+        this.filpX = info.filpX;
+        this.isMoving = info.isMoving;
+        //그외의 정보를 여기서 셋팅
     }
 }
