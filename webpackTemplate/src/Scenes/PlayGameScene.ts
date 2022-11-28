@@ -5,9 +5,10 @@ import { GameOption } from "../GameOption";
 import { io, Socket } from "socket.io-client";
 import { addClientListener } from "../Network/ClientListener";
 import Session from "../Server/Session";
-import { SessionInfo } from "../Network/Protocol";
+import { HitInfo, SessionInfo } from "../Network/Protocol";
 import SocketManager from "../Core/SocketManager";
 import ProjectilePool from "../GameObjects/Pools/ProjectilePool";
+import Projectile from "../GameObjects/Projectile";
 
 interface RemotePlayerList
 {
@@ -61,8 +62,31 @@ export default class PlayGameScene extends Phaser.Scene
         {
             this.player = new Player(this,x,y,"player",speed,jumpPower,id,isRemote);
             this.physics.add.collider(this.player,MapManager.Instance.collisions);
+            this.physics.add.collider(this.player,ProjectilePool.Instance.pool,this.hitByIceball,undefined,this);
         }
         
+    }
+
+    hitByIceball(body1:any,body2:any):void
+    {
+        let p = body1 as Player;
+        let iceball = body2 as Projectile;
+
+        if(p.isWaitingForHit(iceball.projectileId))return;
+
+        p.addWating(iceball.projectileId);
+
+        let {x,y} = iceball.getTopLeft();
+
+        let hitinfo :HitInfo = {
+            playerId:SocketManager.Instance.socket.id,
+            projectileId:iceball.projectileId,
+            projectileLTPosition: {x,y}
+        }
+
+        SocketManager.Instance.sendData("hit_report",hitinfo);
+        // console.log("hit");
+        // p.takeHit(1);
     }
     
     removePlayer(key:string):void

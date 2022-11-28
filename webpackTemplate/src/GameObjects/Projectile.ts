@@ -20,6 +20,18 @@ export default class Projectile extends Phaser.Physics.Arcade.Sprite
         scene.physics.add.existing(this);
 
         this.body.setAllowGravity(false);
+
+        this.body.setSize(20,20);
+    }
+
+
+    protected preUpdate(time: number, delta: number): void {
+        super.preUpdate(time,delta);
+        this.lifeTime += delta;
+        if(this.lifeTime >= this.maxLifeTime)
+        {
+            this.setDisable();
+        }
     }
 
     fire(pos:Position,lifeTime:number,speed:number,direction:number,ownerId:string,projectileId:number):void
@@ -32,5 +44,12 @@ export default class Projectile extends Phaser.Physics.Arcade.Sprite
         this.setFlipX(direction < 0);
         this.setVelocityX(speed * direction);
         //this.projectileId = projectileId;
+    }
+
+    setDisable():void
+    {
+        this.body.reset(0,0);
+        this.setActive(false);
+        this.setVisible(false);
     }
 }

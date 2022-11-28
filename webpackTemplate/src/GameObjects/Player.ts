@@ -1,6 +1,9 @@
 import Phaser from "phaser";
 import InitPlayerAnimation from "../Animations/PlayerAnimation";
-import { SessionInfo } from "../Network/Protocol";
+import { checkAnimationPlay } from "../Core/GameUtil";
+import { Iceball, SessionInfo } from "../Network/Protocol";
+import PlayerAttack from "./PlayerAttack";
+import ProjectilePool from "./Pools/ProjectilePool";
 
 export default class Player extends Phaser.Physics.Arcade.Sprite
 {
@@ -17,6 +20,12 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
     isRemoto:boolean = false;
     id:string;
 
+    //Attack
+    attack:PlayerAttack;
+    hasBeenhit:boolean = false;
+
+    waitingConfirm:number[] = [];
+
     constructor(scene:Phaser.Scene,x:number,y:number,key:string,speed:number,jumpPower:number,id:string,isRemoto:boolean)
     {
         super(scene,x,y,key);
@@ -26,9 +35,29 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
         this.jumpPower = jumpPower;
         this.id = id;
         this.isRemoto = isRemoto;
+
+        this.attack = new PlayerAttack(this,1000);
+
         this.init();
 
         
+    }
+
+    isWaitingForHit(projectileId:number):boolean
+    {
+        return this.waitingConfirm.find(x=>x == projectileId) != undefined;
+    }
+
+    addWating(projectileId:number):void
+    {
+        this.waitingConfirm.push(projectileId);
+    }
+
+    removeWaiting(projectileId:number):void
+    {
+        let idx = this.waitingConfirm.findIndex(x => x== projectileId);
+        if(idx < 0 )return;
+        this.waitingConfirm.splice(idx,1);
     }
 
     init():void
@@ -48,10 +77,12 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
         }  
     }
 
-    fireIceball():void
+    fireIceball(data:Iceball):void
     {
-        console.log("발사");
+        this.attack.attempAttack();
     }
+
+    
 
     //오른쪽 왼쪽 방향만 dir받는다
     move(direction: number):void
@@ -73,6 +104,8 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
         this.x = info.position.x;
         this.y = info.position.y;
         this.setFlipX(info.filpX);
+
+        if(checkAnimationPlay(this.anims,"throw"))return;
 
         if(info.isMoving)
         {
@@ -120,6 +153,8 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
         if(this.isGround && this.body.velocity.y == 0)
             this.currentJumpCount =0;
 
+        if(checkAnimationPlay(this.anims,"throw")) return;
+
         if(this.isGround == true)
         {
             if(Math.abs(this.body.velocity.x) <= 0.1)
@@ -135,5 +170,25 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
         {
             this.play("jump",true);
         }
+    }
+
+    takeHit(damage:number):void
+    {
+        if(this.hasBeenhit) return;
+
+        this.hasBeenhit = true;
+
+        let tween = this.scene.tweens.add({
+            targets:this,
+            duration:200,
+            repeat: -1,
+            alpha:0.2,
+            yoyo:true
+        });
+
+        this.scene.time.delayedCall(1000,()=>{
+            this.hasBeenhit = false;
+            tween.stop(0);
+        })
     }
 }

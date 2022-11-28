@@ -2,7 +2,7 @@ import { Socket } from "socket.io";
 import ServerMapManager from "../Server/ServerMapManager";
 import Session from "../Server/Session";
 import SessionManager from "../Server/SessionManager";
-import { SessionInfo ,PlayerList} from "./Protocol";
+import { SessionInfo ,PlayerList, Iceball, HitInfo} from "./Protocol";
 
 //서버에서 소켓이 리스닝해야하는 이벤트를 여기서 다 등록
 export const addServerListener = (socket:Socket,session:Session) => 
@@ -30,6 +30,34 @@ export const addServerListener = (socket:Socket,session:Session) =>
 
         //해당 세션이 존재하면 인포 셋팅한다.
         SessionManager.Instance.getSession(info.id)?.setInfo(info);
+     });
+
+     let projectileId:number = 0;
+     socket.on("fire_attampt",data=>{
+        let iceball = data as Iceball;
+        projectileId++;
+        iceball.projectTileId = projectileId;
+        
+        SessionManager.Instance.broadcast("fire_projectile",iceball,socket.id,false);
+     });
+
+     socket.on("hit_report",data =>{
+        let hitInfo = data as HitInfo;
+
+        let session = SessionManager.Instance.getSession(hitInfo.playerId);
+        if(session == undefined) return;
+
+        let {x,y} = session.position;
+        let sLTPos = {x:x - 32,y:y - 38};
+        let iLTPos = hitInfo.projectileLTPosition;
+
+        let vecify:boolean = 
+        (sLTPos.x < iLTPos.x + 20)
+        &&(sLTPos.y < iLTPos.y + 20)
+        &&(sLTPos.x+32 + 32*0.5 > iLTPos.x)
+        &&(sLTPos.y + 38+38*0.5 > iLTPos.y)
+
+        if(vecify == false) return;
      });
 
      socket.on("disconnect", (reason:string) => {

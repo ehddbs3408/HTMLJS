@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import Projectile from "../ProjecTile";
+import Projectile from "../Projectile";
 
 export default class ProjectilePool extends Phaser.Physics.Arcade.Group
 {
@@ -11,11 +11,11 @@ export default class ProjectilePool extends Phaser.Physics.Arcade.Group
     {
         super(scene.physics.world,scene);
 
-        this.createMultiple({
+        this.pool = this.createMultiple({
             classType:Projectile,
             frameQuantity:10,
             active:false,
-            visible:false,
+            visible:false,  
             key:'iceball',
 
         }) as Projectile[];

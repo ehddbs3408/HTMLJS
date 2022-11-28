@@ -17,3 +17,20 @@ export interface PlayerList
 {
     list:SessionInfo[];
 }
+
+export interface Iceball
+{
+    ownerId:string;
+    projectTileId:number;
+    position:Position;
+    direction:number;
+    velocity:number;
+    lifetime:number;
+}
+
+export interface HitInfo
+{
+    projectileId:number;
+    playerId:string;
+    projectileLTPosition:Position;
+}

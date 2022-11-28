@@ -1,6 +1,6 @@
 import { Socket } from "socket.io-client";
 import PlayGameScene from "../Scenes/PlayGameScene";
-import { PlayerList,Position,SessionInfo } from "./Protocol";
+import { Iceball, PlayerList,Position,SessionInfo } from "./Protocol";
 
 export const addClientListener = (socket:Socket,scene:PlayGameScene) =>{
     socket.on("position", data =>{
@@ -36,5 +36,17 @@ export const addClientListener = (socket:Socket,scene:PlayGameScene) =>{
             scene.remotePlayers[p.id]?.setInfoSync(p);
             
         })
+    });
+
+    socket.on("fire_projectile",data =>{
+        let iceball = data as Iceball;
+        if(iceball.ownerId == socket.id)
+        {
+            scene.player.attack.fireProjectTile(iceball);
+        }
+        else
+        {
+            scene.remotePlayers[iceball.ownerId].attack.fireProjectTile(iceball);
+        }
     });
 };
