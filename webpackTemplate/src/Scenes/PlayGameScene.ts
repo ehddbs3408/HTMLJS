@@ -81,7 +81,8 @@ export default class PlayGameScene extends Phaser.Scene
         let hitinfo :HitInfo = {
             playerId:SocketManager.Instance.socket.id,
             projectileId:iceball.projectileId,
-            projectileLTPosition: {x,y}
+            projectileLTPosition: {x,y},
+            damage: iceball.damage,
         }
 
         SocketManager.Instance.sendData("hit_report",hitinfo);
@@ -91,6 +92,7 @@ export default class PlayGameScene extends Phaser.Scene
     
     removePlayer(key:string):void
     {
+        this.remotePlayers[key].hpBar.destroy();
         this.remotePlayers[key].destroy();
         delete this.remotePlayers[key];
     }

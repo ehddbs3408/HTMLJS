@@ -1,4 +1,4 @@
-import { Position } from "../Network/Protocol";
+import { Iceball, Position } from "../Network/Protocol";
 
 export default class Projectile extends Phaser.Physics.Arcade.Sprite
 {
@@ -34,16 +34,18 @@ export default class Projectile extends Phaser.Physics.Arcade.Sprite
         }
     }
 
-    fire(pos:Position,lifeTime:number,speed:number,direction:number,ownerId:string,projectileId:number):void
+    fire(data:Iceball):void
     {
+        let {position,damage,direction,lifetime,ownerId,projectTileId,velocity} = data
         this.lifeTime = 0;
-        this.maxLifeTime = lifeTime;
-        this.x = pos.x;
-        this.y = pos.y;
+        this.maxLifeTime = lifetime;
+        this.x = position.x;
+        this.y = position.y;
         this.ownerId = ownerId;
+        this.damage = damage;
         this.setFlipX(direction < 0);
-        this.setVelocityX(speed * direction);
-        //this.projectileId = projectileId;
+        this.setVelocityX(velocity * direction);
+        this.projectileId = projectTileId;
     }
 
     setDisable():void

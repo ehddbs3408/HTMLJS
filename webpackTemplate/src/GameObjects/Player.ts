@@ -1,7 +1,9 @@
 import Phaser from "phaser";
 import InitPlayerAnimation from "../Animations/PlayerAnimation";
 import { checkAnimationPlay } from "../Core/GameUtil";
-import { Iceball, SessionInfo } from "../Network/Protocol";
+import SocketManager from "../Core/SocketManager";
+import { DeadInfo, Iceball, SessionInfo } from "../Network/Protocol";
+import HealthBar from "./HealthBar";
 import PlayerAttack from "./PlayerAttack";
 import ProjectilePool from "./Pools/ProjectilePool";
 
@@ -26,6 +28,14 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
 
     waitingConfirm:number[] = [];
 
+    //HP
+    hp:number;
+    maxHp:number;
+    hpBar: HealthBar;
+    isDead:boolean = false;
+
+    tween:Phaser.Tweens.Tween;
+
     constructor(scene:Phaser.Scene,x:number,y:number,key:string,speed:number,jumpPower:number,id:string,isRemoto:boolean)
     {
         super(scene,x,y,key);
@@ -38,6 +48,8 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
 
         this.attack = new PlayerAttack(this,1000);
 
+        this.maxHp = this.hp = 10;
+        this.hpBar = new HealthBar(this.scene,{x:x - 32 * 0.5,y:y - 38 * 0.5 - 15},new Phaser.Math.Vector2(32,9));
         this.init();
 
         
@@ -120,10 +132,14 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
     {
         return this.body.velocity.length() > 0.1;//이동중
     }
+    protected preUpdate(time: number, delta: number): void {
+        super.preUpdate(time,delta);
+        this.hpBar.move(this.x - 32 * 0.5,this.y - 38 * 0.5  -15);
+    }
 
     update(time:number,delta:number):void
     {
-
+        if(this.hasBeenhit || this.isDead) return;
         if(this.cursorKey == undefined) return;
 
         const {left,right,space} = this.cursorKey;
@@ -174,21 +190,69 @@ export default class Player extends Phaser.Physics.Arcade.Sprite
 
     takeHit(damage:number):void
     {
-        if(this.hasBeenhit) return;
-
+        if(this.hasBeenhit || this.isDead) return;
         this.hasBeenhit = true;
 
-        let tween = this.scene.tweens.add({
-            targets:this,
-            duration:200,
-            repeat: -1,
-            alpha:0.2,
-            yoyo:true
-        });
+        if(this.tween)
+        {
+            this.tween.stop();
+        }
 
-        this.scene.time.delayedCall(1000,()=>{
-            this.hasBeenhit = false;
-            tween.stop(0);
-        })
+        this.hp -= damage;
+
+        if(this.hp <= 0)
+        {
+            this.hp = 0
+            this.setDead();
+            return;
+        }else
+        {
+            this.tween = this.scene.tweens.add({
+                targets:this,
+                duration:200,
+                repeat: -1,
+                alpha:0.2,
+                yoyo:true
+            });
+    
+            this.scene.time.delayedCall(1000,()=>{
+                this.hasBeenhit = false;
+                this.tween.stop(0);
+            })
+        }
+        this.hpBar.setHealth(this.hp/this.maxHp);
+        
+    }
+    bounceOff(dir:Phaser.Math.Vector2):void
+    {
+        this.setVelocity(-dir.x * 500,-dir.y*500);
+    }
+
+    setDead():void
+    {
+        this.hasBeenhit = false;
+        this.setTint(0xff0000);
+        this.body.checkCollision.none = true;
+        this.isDead = true;
+        
+        if(this.isRemoto == false)
+        {
+            this.setVelocity(0,-200);
+
+            this.scene.time.delayedCall(2000,()=>{
+                //사버로 플레이어가 사망했다 보내야하거
+                this.setActive(false);
+                this.setVisible(false);
+
+                let info:DeadInfo = {playerId:this.id};
+                SocketManager.Instance.sendData("player_dead",info);
+            });
+        }
+        
+    }
+
+    revive():void
+    {
+
     }
 }

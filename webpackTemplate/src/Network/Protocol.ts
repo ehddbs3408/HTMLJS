@@ -26,6 +26,7 @@ export interface Iceball
     direction:number;
     velocity:number;
     lifetime:number;
+    damage:number;
 }
 
 export interface HitInfo
@@ -33,4 +34,17 @@ export interface HitInfo
     projectileId:number;
     playerId:string;
     projectileLTPosition:Position;
+    damage:number;
+}
+
+export interface DeadInfo
+{
+    playerId:string;
+
+}
+
+export interface ReviveInfo
+{
+    playerId:string;
+    info:SessionInfo;
 }

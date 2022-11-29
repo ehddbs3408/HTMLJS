@@ -1,8 +1,9 @@
+import { Data } from "phaser";
 import { Socket } from "socket.io";
 import ServerMapManager from "../Server/ServerMapManager";
 import Session from "../Server/Session";
 import SessionManager from "../Server/SessionManager";
-import { SessionInfo ,PlayerList, Iceball, HitInfo} from "./Protocol";
+import { SessionInfo ,PlayerList, Iceball, HitInfo, DeadInfo, ReviveInfo} from "./Protocol";
 
 //서버에서 소켓이 리스닝해야하는 이벤트를 여기서 다 등록
 export const addServerListener = (socket:Socket,session:Session) => 
@@ -58,6 +59,25 @@ export const addServerListener = (socket:Socket,session:Session) =>
         &&(sLTPos.y + 38+38*0.5 > iLTPos.y)
 
         if(vecify == false) return;
+
+        console.log("zxc");
+        
+        SessionManager.Instance.broadcast("hit_confirm", hitInfo, socket.id, false);
+     });
+
+     socket.on("player_dead",data =>{
+         let deadinfo = data as DeadInfo;
+         SessionManager.Instance.broadcast("player_dead",deadinfo,socket.id,true);
+
+
+
+         setTimeout(()=>{
+            let pos = ServerMapManager.Instance.getRandomSpawnPosition();
+            session.setPosition(pos);
+
+            let reviveinfo : ReviveInfo = {playerId:deadinfo.playerId,info:session.getSesstionInfo()};
+            SessionManager.Instance.broadcast("player_revive",reviveinfo,socket.id,false);
+         },1000*5);
      });
 
      socket.on("disconnect", (reason:string) => {
@@ -67,6 +87,7 @@ export const addServerListener = (socket:Socket,session:Session) =>
         //여기서 접속한 모든 사용자에게 해당 유저가 떠났음을 알려줘야 한다.
         SessionManager.Instance.broadcast("leave_player",session.getSesstionInfo(), socket.id, true);
     });
+    
 
      //클라이언트가 disconnection되며누 
      //leave_player 라는 메세지와 함께 sessioninfo가 넘아오도록 민들어

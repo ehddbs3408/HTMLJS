@@ -10,7 +10,7 @@ export default class PlayerAttack
 {
     lastFireTime:number = 0;
     coolDown:number = 1000;
-    damage:number = 5;
+    damage:number = 10;
     lifeTime:number = 1000;
 
     player:Player;
@@ -34,7 +34,7 @@ export default class PlayerAttack
         let position = {x:x + direction * 10,y:y}
         let velocity:number = 400;
 
-        let data:Iceball = {ownerId,direction,position,lifetime:this.lifeTime,velocity,projectTileId:0};
+        let data:Iceball = {ownerId,direction,position,lifetime:this.lifeTime,velocity,projectTileId:0,damage:this.damage};
         
         SocketManager.Instance.sendData("fire_attampt",data);
     }
@@ -45,7 +45,7 @@ export default class PlayerAttack
 
         let p = ProjectilePool.Instance.getProjectile();
         
-        p.fire(data.position,data.lifetime,data.velocity,data.direction,data.ownerId,1);
+        p.fire(data);
 
         this.player.play("throw",true);
     }
