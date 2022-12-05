@@ -29,10 +29,12 @@ export default class PreloadAssetScene extends Phaser.Scene
 
         //투사체이미지
         this.load.image("iceball","assets/weapons/iceball_001.png");
+
+        this.load.image("bg_sky","assets/background_0.png");
     }
 
     create(): void 
     {
-        this.scene.start("PlayGame");
+        this.scene.start("Lobby");
     }
 }

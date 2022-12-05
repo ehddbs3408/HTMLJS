@@ -1,0 +1,108 @@
+*{margin: 0; padding: 0;}
+
+#gameDiv
+{
+    background-color: transparent;
+    width: 100px;
+    height: 100px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    overflow: hidden;
+}
+#pageContainer
+{
+    width: 300%;
+    height: 100%;
+    display: flex;
+    position: absolute;
+    left: 0;
+    top: 0;
+    transition: left 0.4s;
+}
+
+#loginPage
+{
+    display: flex;
+    justify-content: center;
+    align-items: center;   
+}
+
+#loginPage > .inner
+{
+    width: 400px;
+    height: 45px;
+    background-color: rgb(39, 36, 36);
+    border-radius: 5px;
+    display: flex;
+    padding: 10px 20px;
+}
+
+#loginPage > .inner > input
+{
+    flex:4;
+    margin-right: 10px;
+}
+
+#loginPage > .inner > button
+{
+    flex:1;
+}
+
+#lobbyPage
+{
+    background-color: rgb(0, 255, 0);
+
+}
+
+#roomPage
+{
+    background-color: blue;
+}
+
+#tooltip
+{
+    position: absolute;
+    left: 0; top: 0;
+    background-color: black;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+}
+#tooltip > .arrow-box
+{
+    width: 15px;
+    height: 15px;
+    background-color: rgb(0, 0, 0);
+    position: absolute;
+    bottom: 0;
+    transform: translateY(50%) rotateZ(45deg);
+}
+
+.btn
+{
+    color: white;
+    border:  1px solid transparent;
+    padding:  4px 8px;
+    transition: all 0.5s;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.btn.btn-blue
+{
+    background-color: rgb(47, 47, 164);
+    border: 1px solid rgb(61, 30, 172);
+
+}
+.btn.btn-blue:hover
+{
+    background-color: blue;
+}
+
+input{
+    border-radius:  4px;
+    border: 1px solid white;
+    padding: 4px 8px;
+    outline: none;
+}
