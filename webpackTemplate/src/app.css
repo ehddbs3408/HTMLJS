@@ -1,4 +1,4 @@
-*{margin: 0; padding: 0;}
+*{margin: 0; padding: 0; user-select: none;}
 
 #gameDiv
 {
@@ -90,13 +90,44 @@
     border-radius: 10px;
     flex: 1;
     margin: 20px;
+    padding: 10px 50px;
+    overflow-y: auto;
 }
 #lobbyPage > .content-body > .room
 {
-    width: 80%;
+    width: 100%;
     display: flex;
     justify-content: space-between;
     height: 40px;
+    align-items: center;
+    background-color: white;
+    padding: 0px 15px;
+    box-sizing: border-box;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+#lobbyPage > .content-body > .room > .light
+{
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+#lobbyPage > .content-body > .room > .light > .circle
+{
+    
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+}
+#lobbyPage > .content-body > .room > .light > .circle.green
+{
+    background: radial-gradient(rgb(37, 234, 11) 4px,rgb(8, 234, 204) 50%);
+}
+#lobbyPage > .content-body > .room > .light > .circle.red
+{
+    background: radial-gradient(rgb(238, 9, 9) 4px,rgb(199, 15, 55) 50%);
 }
 /* lobby end============================================= */
 #roomPage
