@@ -3,7 +3,7 @@ import MapManager from "../Core/MapManager";
 import Player from "../GameObjects/Player";
 import { GameOption } from "../GameOption";
 import { io, Socket } from "socket.io-client";
-import { addClientListener } from "../Network/ClientListener";
+import { addClientGameListener } from "../Network/ClientListener";
 import Session from "../Server/Session";
 import { HitInfo, SessionInfo } from "../Network/Protocol";
 import SocketManager from "../Core/SocketManager";
@@ -29,9 +29,7 @@ export default class PlayGameScene extends Phaser.Scene
     constructor()
     {
         super({key:"PlayGame"});
-        const socket = io();
-        
-        SocketManager.Instance = new SocketManager(socket);
+        SocketManager.Instance.addGameProtocol(this);
     }
 
     create():void 
@@ -39,7 +37,7 @@ export default class PlayGameScene extends Phaser.Scene
         MapManager.Instance = new MapManager(this, "level1");
 
         //addClientListener(this.socket,this);
-        SocketManager.Instance.addProtocol(this);
+        
         ProjectilePool.Instance = new ProjectilePool(this);
 
         this.playerName = "ehddbs";

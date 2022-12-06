@@ -48,3 +48,9 @@ export interface ReviveInfo
     playerId:string;
     info:SessionInfo;
 }
+
+export interface UserInfo
+{
+    name:string;
+    playerId:string;
+}

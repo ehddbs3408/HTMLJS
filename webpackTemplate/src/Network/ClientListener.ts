@@ -1,9 +1,21 @@
 import { Socket } from "socket.io-client";
+import SocketManager from "../Core/SocketManager";
 import ProjectilePool from "../GameObjects/Pools/ProjectilePool";
+import LobbyScene from "../Scenes/LobbyScene";
 import PlayGameScene from "../Scenes/PlayGameScene";
-import { DeadInfo, HitInfo, Iceball, PlayerList,Position,ReviveInfo,SessionInfo } from "./Protocol";
+import { DeadInfo, HitInfo, Iceball, PlayerList,Position,ReviveInfo,SessionInfo, UserInfo } from "./Protocol";
 
-export const addClientListener = (socket:Socket,scene:PlayGameScene) =>{
+export const addClientLobbyListener = (socket:Socket,scene:LobbyScene) =>{
+    socket.on("login_confirm",data=>{
+        
+        let userInfo = data as UserInfo;
+        SocketManager.Instance.setName(userInfo.name);
+
+        scene.gotoLobby();
+        console.log("go to lobby");
+    });
+}
+export const addClientGameListener = (socket:Socket,scene:PlayGameScene) =>{
     socket.on("position", data =>{
         let pos:Position = data as Position;
         scene.onComplateConnection(pos.x,pos.y);

@@ -1,13 +1,25 @@
 import { Data } from "phaser";
 import { Socket } from "socket.io";
 import ServerMapManager from "../Server/ServerMapManager";
-import Session from "../Server/Session";
+import Session, { SessionStatus } from "../Server/Session";
 import SessionManager from "../Server/SessionManager";
-import { SessionInfo ,PlayerList, Iceball, HitInfo, DeadInfo, ReviveInfo} from "./Protocol";
+import { SessionInfo ,PlayerList, Iceball, HitInfo, DeadInfo, ReviveInfo, UserInfo} from "./Protocol";
 
 //서버에서 소켓이 리스닝해야하는 이벤트를 여기서 다 등록
 export const addServerListener = (socket:Socket,session:Session) => 
 {
+   socket.on("login_user",data =>{
+      if(session.status == SessionStatus.CONNECTED)
+      {
+         let userInfo = data as UserInfo;
+         session.setName(userInfo.name);
+
+         session.status = SessionStatus.LOBBY;
+         socket.emit("login_confirm",userInfo);
+      }
+      
+   });
+
     socket.on("enter",data=>{
         let pos =ServerMapManager.Instance.getRandomSpawnPosition();
         socket.emit("position",pos);
@@ -79,6 +91,8 @@ export const addServerListener = (socket:Socket,session:Session) =>
             SessionManager.Instance.broadcast("player_revive",reviveinfo,socket.id,false);
          },1000*5);
      });
+
+     
 
      socket.on("disconnect", (reason:string) => {
         SessionManager.Instance.removeSession(socket.id);

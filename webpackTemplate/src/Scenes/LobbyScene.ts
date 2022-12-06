@@ -1,5 +1,8 @@
 import Phaser from "phaser";
+import SocketManager from "../Core/SocketManager";
 import TooltipHelper from "../Core/TooltipHelper";
+import { UserInfo } from "../Network/Protocol";
+import SessionManager from "../Server/SessionManager";
 
 export default class LobbyScene extends Phaser.Scene
 {
@@ -10,6 +13,7 @@ export default class LobbyScene extends Phaser.Scene
     constructor()
     {
         super({key:"Lobby"});
+        SocketManager.Instance.addLobbyProtocol(this);
         this.UIdIV = document.querySelector("#gameDiv") as HTMLCanvasElement;
         this.gameCanvas = document.querySelector("#theGame > canvas") as HTMLCanvasElement;
 
@@ -76,7 +80,12 @@ export default class LobbyScene extends Phaser.Scene
         const nameInput = document.querySelector("#nameInput") as HTMLInputElement;
         const loginBtn = document.querySelector("#btnLogin")as HTMLButtonElement;
 
+        nameInput.addEventListener("keydown",e =>{
+            this.toolTip.closeTooltip();
+        });
+
         loginBtn.addEventListener("click", e=>{
+            
             let name = nameInput.value.trim();
             if(name.length == 0 || name.length > 5)
             {
@@ -84,7 +93,15 @@ export default class LobbyScene extends Phaser.Scene
                 return;
             }
 
-            
-        })
+            let data : UserInfo = {name,playerId:""};
+            SocketManager.Instance.sendData("login_user",data);
+        });
+    }
+
+    gotoLobby():void
+    {
+        const pageContainer =this.UIdIV.querySelector("#pageContainer") as HTMLDivElement;
+        
+        pageContainer.style.left = "-100%";
     }
 }

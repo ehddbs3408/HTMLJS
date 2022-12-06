@@ -1,5 +1,6 @@
 import { Socket } from "socket.io-client";
-import { addClientListener } from "../Network/ClientListener";
+import { addClientGameListener, addClientLobbyListener } from "../Network/ClientListener";
+import LobbyScene from "../Scenes/LobbyScene";
 import PlayGameScene from "../Scenes/PlayGameScene";
 
 export default class SocketManager
@@ -7,14 +8,25 @@ export default class SocketManager
     static Instance: SocketManager;
 
     socket: Socket;
+    name:string;
+
     constructor(socket:Socket)
     {
         this.socket = socket;
     }
 
-    addProtocol(scene:PlayGameScene):void
+    setName(value:string):void
     {
-        addClientListener(this.socket,scene);
+        this.name = value;
+    }
+
+    addGameProtocol(scene:PlayGameScene):void
+    {
+        addClientGameListener(this.socket,scene);
+    }
+    addLobbyProtocol(scene:LobbyScene):void
+    {
+        addClientLobbyListener(this.socket,scene);
     }
 
     sendData(protocol:string,data:object):void

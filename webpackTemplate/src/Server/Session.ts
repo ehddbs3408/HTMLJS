@@ -1,6 +1,20 @@
 import {Socket} from 'socket.io';
 import { Position, SessionInfo } from '../Network/Protocol';
 
+export enum SessionStatus
+{
+    CONNECTED = 1,
+    LOBBY = 2,
+    INROOM = 3,
+    READYINROOM = 4,
+    PLAYING = 5
+}
+export enum SessionTeam
+{
+    RED = 1,
+    BLUE = 2,
+    NONE = 3
+}
 export default class Session
 {
     socket:Socket;
@@ -9,6 +23,9 @@ export default class Session
     id:string;
     filpX:boolean = false;
     isMoving:boolean = false;
+
+    status:SessionStatus = SessionStatus.CONNECTED;
+    team:SessionTeam = SessionTeam.RED;
 
     constructor(socket:Socket)
     {
