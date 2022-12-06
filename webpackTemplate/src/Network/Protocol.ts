@@ -54,3 +54,8 @@ export interface UserInfo
     name:string;
     playerId:string;
 }
+export interface CreateRoom
+{
+    name:string;
+    playerId:string;
+}

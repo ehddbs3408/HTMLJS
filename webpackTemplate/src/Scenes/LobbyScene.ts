@@ -1,7 +1,7 @@
 import Phaser from "phaser";
 import SocketManager from "../Core/SocketManager";
 import TooltipHelper from "../Core/TooltipHelper";
-import { UserInfo } from "../Network/Protocol";
+import { CreateRoom, UserInfo } from "../Network/Protocol";
 import SessionManager from "../Server/SessionManager";
 
 export default class LobbyScene extends Phaser.Scene
@@ -23,31 +23,7 @@ export default class LobbyScene extends Phaser.Scene
 
         window.addEventListener("resize",()=> this.resizeUI(20));
         this.setUpLoginPage();
-
-
-        const container = this.UIdIV.querySelector("#pageContainer") as HTMLDivElement;
-        let current:number = 0;
-        window.addEventListener("keydown",e =>{
-            console.log(current);
-            //container.style.left = "-200%";
-            if(e.keyCode == 37)
-            {
-                
-                current -=100;  
-                
-            }else if(e.keyCode == 39)
-            {
-                current +=100;
-                
-            }
-            if(current < -200) current = -200;
-            if(current> 0) current = 0;
-            container.style.left = `${current}%`;
-        });
-        // this.UIdIV.addEventListener("click",()=>{
-            
-        //     container.style.left = "-100%";
-        // });
+        this.setUpLobbyPage();
     }
 
     create():void
@@ -103,5 +79,23 @@ export default class LobbyScene extends Phaser.Scene
         const pageContainer =this.UIdIV.querySelector("#pageContainer") as HTMLDivElement;
         
         pageContainer.style.left = "-100%";
+    }
+
+    setUpLobbyPage():void
+    {
+        const createBtn = document.querySelector("#btnCreate")as HTMLButtonElement;
+
+        createBtn.addEventListener("click",e =>{
+            let roomName = prompt("방제목을 입력해주세요");
+
+            if(roomName == null || roomName.trim() == "")
+            {
+                alert("공백일 수 없어요");
+            }
+            let data: CreateRoom = {name:roomName as string,playerId:SocketManager.Instance.socket.id};
+            SocketManager.Instance.sendData("create_room",data);
+            console.log(roomName);
+            
+        })
     }
 }

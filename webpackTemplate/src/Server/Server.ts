@@ -1,5 +1,5 @@
 import Http from 'http'
-import Express, {Application,Request,response } from 'express'
+import Express, {Application,Request,Response } from 'express'
 import Path from 'path'
 import SocketIO ,{ Server,Socket } from 'socket.io';
 import { GameOption } from '../GameOption';
@@ -36,6 +36,11 @@ io.on("connection",(socket:Socket) =>{
 server.listen(50000, ()=>{
     console.log(`Server is running on 50000 port`);
 });
+
+app.get("/monitor",(req:Request,res:Response)=>{
+    let list = SessionManager.Instance.getAllSessionInfo();
+    res.json(list);
+})
 
 let infoSyncTimer: JobTimer = new JobTimer(50,()=>{
     let list = SessionManager.Instance.getAllSessionInfo();

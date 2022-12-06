@@ -3,7 +3,7 @@ import { Socket } from "socket.io";
 import ServerMapManager from "../Server/ServerMapManager";
 import Session, { SessionStatus } from "../Server/Session";
 import SessionManager from "../Server/SessionManager";
-import { SessionInfo ,PlayerList, Iceball, HitInfo, DeadInfo, ReviveInfo, UserInfo} from "./Protocol";
+import { SessionInfo ,PlayerList, Iceball, HitInfo, DeadInfo, ReviveInfo, UserInfo, CreateRoom} from "./Protocol";
 
 //서버에서 소켓이 리스닝해야하는 이벤트를 여기서 다 등록
 export const addServerListener = (socket:Socket,session:Session) => 
@@ -17,6 +17,12 @@ export const addServerListener = (socket:Socket,session:Session) =>
          session.status = SessionStatus.LOBBY;
          socket.emit("login_confirm",userInfo);
       }
+      
+   });
+
+   socket.on("create_room",data=>{
+      let createRoom = data as CreateRoom
+
       
    });
 
