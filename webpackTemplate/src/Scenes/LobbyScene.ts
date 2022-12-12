@@ -1,7 +1,7 @@
 import Phaser from "phaser";
 import SocketManager from "../Core/SocketManager";
 import TooltipHelper from "../Core/TooltipHelper";
-import { CreateRoom, UserInfo } from "../Network/Protocol";
+import { CreateRoom, RoomInfo, UserInfo } from "../Network/Protocol";
 import SessionManager from "../Server/SessionManager";
 
 export default class LobbyScene extends Phaser.Scene
@@ -91,11 +91,55 @@ export default class LobbyScene extends Phaser.Scene
             if(roomName == null || roomName.trim() == "")
             {
                 alert("공백일 수 없어요");
+                return;
             }
             let data: CreateRoom = {name:roomName as string,playerId:SocketManager.Instance.socket.id};
             SocketManager.Instance.sendData("create_room",data);
             console.log(roomName);
             
         })
+    }
+
+    drawRoomList(list:RoomInfo[]):void
+    {
+        const body = this.UIdIV.querySelector("#lobbyPage > .content-body") as HTMLDivElement;
+        body.innerHTML = "";
+
+        list.forEach(info=>{
+            let {Name,userCnt,maxCnt,isPlaying} = info;
+            let roomHTML = this.getRoomHTML(Name,userCnt,maxCnt,isPlaying);
+            body.appendChild(roomHTML);
+        });
+
+        
+    }
+
+    getRoomHTML(name:string,userCnt:number,maxCnt:number,isPlaying:boolean):HTMLDivElement
+    {
+        let div = document.createElement("div");
+        div.innerHTML = `
+        <div class="room">
+            <div class="name">${name}</div>
+            <div class="light">
+                <div class="circle ${isPlaying == false ? "green" : "red"}"></div>
+            </div>
+            <div class="count-box">
+                <span class="current">${userCnt}</span> /
+                <span class="total">${maxCnt}</span>
+            </div>
+        </div>`;        
+        
+        return div.firstElementChild as HTMLDivElement;
+    }
+
+    goToRoom(roomInfo:RoomInfo):void
+    {
+        const pageContainer =this.UIdIV.querySelector("#pageContainer") as HTMLDivElement;
+        
+        pageContainer.style.left = "-200%";
+
+        //여기에 roominfo에있는 유저리스트를 싹다 그려준다.
+        console.log(roomInfo);
+        
     }
 }

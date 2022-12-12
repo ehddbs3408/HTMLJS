@@ -1,5 +1,6 @@
 import {Socket} from 'socket.io';
 import { Position, SessionInfo } from '../Network/Protocol';
+import Room from './Room';
 
 export enum SessionStatus
 {
@@ -27,11 +28,18 @@ export default class Session
     status:SessionStatus = SessionStatus.CONNECTED;
     team:SessionTeam = SessionTeam.RED;
 
+    room:Room | null = null; //행당 세션이 속해있는 방을 기억한다.
+
     constructor(socket:Socket)
     {
         this.socket = socket;
         this.id = socket.id;
     }
+
+    setRoom(room:Room | null)
+    {
+        this.room = room;
+    } 
     setPosition(position:Position):void
     {
         let {x,y} = position;

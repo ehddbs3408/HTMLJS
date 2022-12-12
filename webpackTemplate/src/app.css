@@ -16,7 +16,7 @@
     height: 100%;
     display: flex;
     position: absolute;
-    left: -100%;
+    left: -0%;
     top: 0;
     transition: left 0.4s;
 }

@@ -59,3 +59,13 @@ export interface CreateRoom
     name:string;
     playerId:string;
 }
+
+export interface RoomInfo
+{
+    userList:UserInfo[];
+    no:number;
+    Name : string;
+    userCnt:number;
+    maxCnt:number;
+    isPlaying:boolean;
+}

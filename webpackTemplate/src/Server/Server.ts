@@ -8,6 +8,7 @@ import { addServerListener } from '../Network/ServerListener';
 import ServerMapManager from './ServerMapManager';
 import SessionManager from './SessionManager';
 import JobTimer from './JobTimer';
+import RoomManager from './RoomManager';
 
 //익스 프레스 웹 엔진
 const app: Application = Express();
@@ -18,6 +19,8 @@ app.use(Express.static("public"));
 const mapPath : string = Path.join(__dirname,"..","assets","level1_stage.json");
 ServerMapManager.Instance = new ServerMapManager(mapPath);
 SessionManager.Instance = new SessionManager();
+
+RoomManager.Instance = new RoomManager();
 
 //엔진을 기반인 서버
 const server = Http.createServer(app);

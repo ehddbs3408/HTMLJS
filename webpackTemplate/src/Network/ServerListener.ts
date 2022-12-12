@@ -1,5 +1,6 @@
 import { Data } from "phaser";
 import { Socket } from "socket.io";
+import RoomManager from "../Server/RoomManager";
 import ServerMapManager from "../Server/ServerMapManager";
 import Session, { SessionStatus } from "../Server/Session";
 import SessionManager from "../Server/SessionManager";
@@ -21,12 +22,22 @@ export const addServerListener = (socket:Socket,session:Session) =>
    });
 
    socket.on("create_room",data=>{
-      let createRoom = data as CreateRoom
+      let {name,playerId} = data as CreateRoom
 
+      let room = RoomManager.Instance.createRoom(name);
+      room.ownerID = playerId;
+      room.enterRoom(session);
+      
+      socket.emit("enter_room",room.serialize());
+      
       
    });
 
-    socket.on("enter",data=>{
+   socket.on("room_list",data =>{
+      socket.emit("room_list",RoomManager.Instance.getAllRoomInfo());
+   });
+
+   socket.on("enter",data=>{
         let pos =ServerMapManager.Instance.getRandomSpawnPosition();
         socket.emit("position",pos);
         session.setName(data.name);

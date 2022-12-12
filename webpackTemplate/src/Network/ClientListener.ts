@@ -3,7 +3,7 @@ import SocketManager from "../Core/SocketManager";
 import ProjectilePool from "../GameObjects/Pools/ProjectilePool";
 import LobbyScene from "../Scenes/LobbyScene";
 import PlayGameScene from "../Scenes/PlayGameScene";
-import { DeadInfo, HitInfo, Iceball, PlayerList,Position,ReviveInfo,SessionInfo, UserInfo } from "./Protocol";
+import { DeadInfo, HitInfo, Iceball, PlayerList,Position,ReviveInfo,RoomInfo,SessionInfo, UserInfo } from "./Protocol";
 
 export const addClientLobbyListener = (socket:Socket,scene:LobbyScene) =>{
     socket.on("login_confirm",data=>{
@@ -12,7 +12,20 @@ export const addClientLobbyListener = (socket:Socket,scene:LobbyScene) =>{
         SocketManager.Instance.setName(userInfo.name);
 
         scene.gotoLobby();
+        socket.emit("room_list",{});
         console.log("go to lobby");
+    });
+
+    socket.on("enter_room",data=>{
+        let roomInfo = data as RoomInfo;
+        
+        scene.goToRoom(roomInfo);
+        
+    })
+
+    socket.on("room_list",data=>{
+        let list = data as RoomInfo[];
+        scene.drawRoomList(list);
     });
 }
 export const addClientGameListener = (socket:Socket,scene:PlayGameScene) =>{
