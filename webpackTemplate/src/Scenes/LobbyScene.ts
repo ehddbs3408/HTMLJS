@@ -69,6 +69,9 @@ export default class LobbyScene extends Phaser.Scene
                 return;
             }
 
+            const tilte = document.querySelector("#lobbyPage > .info-row > .text-box > .name") as HTMLDivElement;
+            tilte.innerHTML = name;
+
             let data : UserInfo = {name,playerId:""};
             SocketManager.Instance.sendData("login_user",data);
         });
@@ -77,6 +80,8 @@ export default class LobbyScene extends Phaser.Scene
     gotoLobby():void
     {
         const pageContainer =this.UIdIV.querySelector("#pageContainer") as HTMLDivElement;
+        
+        
         
         pageContainer.style.left = "-100%";
     }
@@ -98,20 +103,30 @@ export default class LobbyScene extends Phaser.Scene
             console.log(roomName);
             
         })
+
+        const refreshBtn = document.querySelector("#btnRefresh") as HTMLButtonElement;
+        refreshBtn.addEventListener("click",e=>{
+            SocketManager.Instance.sendData("room_list",{});
+        })
     }
 
     drawRoomList(list:RoomInfo[]):void
     {
         const body = this.UIdIV.querySelector("#lobbyPage > .content-body") as HTMLDivElement;
+        
         body.innerHTML = "";
+        
 
         list.forEach(info=>{
-            let {Name,userCnt,maxCnt,isPlaying} = info;
+            let {Name,userCnt,maxCnt,isPlaying,no} = info;
             let roomHTML = this.getRoomHTML(Name,userCnt,maxCnt,isPlaying);
+            roomHTML.addEventListener("click",e=>{
+                console.log(no);
+                
+            });
+            
             body.appendChild(roomHTML);
-        });
-
-        
+        }); 
     }
 
     getRoomHTML(name:string,userCnt:number,maxCnt:number,isPlaying:boolean):HTMLDivElement

@@ -105,6 +105,12 @@
     box-sizing: border-box;
     border-radius: 5px;
     margin-bottom: 20px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+#lobbyPage > .content-body > .room:hover
+{
+    background-color: rgb(90, 87, 87);
 }
 #lobbyPage > .content-body > .room > .light
 {

@@ -22,6 +22,11 @@ SessionManager.Instance = new SessionManager();
 
 RoomManager.Instance = new RoomManager();
 
+//debug
+RoomManager.Instance.createRoom("더미더미더미더미더미더믿미");
+RoomManager.Instance.createRoom("더미더미더미더미더미더믿미2");
+
+
 //엔진을 기반인 서버
 const server = Http.createServer(app);
 
@@ -34,6 +39,8 @@ io.on("connection",(socket:Socket) =>{
     SessionManager.Instance.addSession(socket.id,session);
 
     addServerListener(socket,session);
+
+
 })
 
 server.listen(50000, ()=>{

@@ -1,4 +1,5 @@
 import { SessionInfo } from "../Network/Protocol";
+import RoomManager from "./RoomManager";
 import Session from "./Session";
 
 export interface SessionMap
@@ -28,7 +29,13 @@ export default class SessionManager
 
     removeSession(key:string):void
     {
+        let s = this.map[key];
         delete this.map[key];
+        if(s.room != null)
+        {
+            RoomManager.Instance.leaveRoom(s);
+            
+        }
     }
 
     broadcast(protocol:string,msgJson:Object,senderKey:string,exceptSender:boolean = false):void
