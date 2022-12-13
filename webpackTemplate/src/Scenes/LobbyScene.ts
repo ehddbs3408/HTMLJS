@@ -1,7 +1,7 @@
 import Phaser from "phaser";
 import SocketManager from "../Core/SocketManager";
 import TooltipHelper from "../Core/TooltipHelper";
-import { CreateRoom, RoomInfo, UserInfo } from "../Network/Protocol";
+import { CreateRoom, EnterRoom, RoomInfo, UserInfo } from "../Network/Protocol";
 import SessionManager from "../Server/SessionManager";
 
 export default class LobbyScene extends Phaser.Scene
@@ -24,6 +24,7 @@ export default class LobbyScene extends Phaser.Scene
         window.addEventListener("resize",()=> this.resizeUI(20));
         this.setUpLoginPage();
         this.setUpLobbyPage();
+        this.setUpRoomPage();
     }
 
     create():void
@@ -122,7 +123,8 @@ export default class LobbyScene extends Phaser.Scene
             let roomHTML = this.getRoomHTML(Name,userCnt,maxCnt,isPlaying);
             roomHTML.addEventListener("click",e=>{
                 console.log(no);
-                
+                let enterRoom:EnterRoom = {roomNO:no}
+                SocketManager.Instance.sendData("enter_room",enterRoom);
             });
             
             body.appendChild(roomHTML);
@@ -156,5 +158,11 @@ export default class LobbyScene extends Phaser.Scene
         //여기에 roominfo에있는 유저리스트를 싹다 그려준다.
         console.log(roomInfo);
         
+    }
+
+    setUpRoomPage():void
+    {
+        const redTeamDiv = document.querySelector(".team.red") as HTMLDivElement;
+        const blueTeamDiv = document.querySelector(".team.blue") as HTMLDivElement;
     }
 }

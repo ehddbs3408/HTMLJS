@@ -38,6 +38,16 @@ export default class RoomManager
         }
     }
 
+    getRoom(roomNO:number): Room | null
+    {
+        if(this.roomMap[roomNO] == undefined)
+        {
+            return null;
+        }else
+            return this.roomMap[roomNO];
+
+    }
+
     //전체 
     getAllRoomInfo():RoomInfo[]
     {

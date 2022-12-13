@@ -60,6 +60,11 @@ export interface CreateRoom
     playerId:string;
 }
 
+export interface EnterRoom
+{
+    roomNO:number;
+}
+
 export interface RoomInfo
 {
     userList:UserInfo[];
@@ -68,4 +73,9 @@ export interface RoomInfo
     userCnt:number;
     maxCnt:number;
     isPlaying:boolean;
+}
+
+export interface MsgBox
+{
+    msg:string;
 }

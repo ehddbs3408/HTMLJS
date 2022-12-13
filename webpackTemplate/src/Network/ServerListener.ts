@@ -4,7 +4,7 @@ import RoomManager from "../Server/RoomManager";
 import ServerMapManager from "../Server/ServerMapManager";
 import Session, { SessionStatus } from "../Server/Session";
 import SessionManager from "../Server/SessionManager";
-import { SessionInfo ,PlayerList, Iceball, HitInfo, DeadInfo, ReviveInfo, UserInfo, CreateRoom} from "./Protocol";
+import { SessionInfo ,PlayerList, Iceball, HitInfo, DeadInfo, ReviveInfo, UserInfo, CreateRoom, EnterRoom, MsgBox} from "./Protocol";
 
 //서버에서 소켓이 리스닝해야하는 이벤트를 여기서 다 등록
 export const addServerListener = (socket:Socket,session:Session) => 
@@ -30,6 +30,32 @@ export const addServerListener = (socket:Socket,session:Session) =>
       
       socket.emit("enter_room",room.serialize());
       
+      
+   });
+
+   socket.on("enter_room",data=>{
+      let enterRoom = data as EnterRoom;
+      
+      let room =
+      RoomManager.Instance.getRoom(enterRoom.roomNO);
+      let msg:MsgBox = {msg:"존재하지 않는 방입니다."};
+      if(room == null)
+      {
+         socket.emit("msgbox",{msg})
+      }
+      else
+      {
+         let result = room.enterRoom(session);
+         if(result == false)
+         {
+            msg.msg = "더이상 방에 자리가 없음. 새로고침 하셈";
+            socket.emit("msgBox",msg);
+         }
+         else
+         {
+            socket.emit("enter_room",room.serialize());
+         }
+      }
       
    });
 
@@ -115,6 +141,10 @@ export const addServerListener = (socket:Socket,session:Session) =>
         SessionManager.Instance.removeSession(socket.id);
         console.log(`${session.name} ( ${socket.id} ) is disconnected`);
 
+        if(session.room != null)
+        {
+            session.room.broadcast("leave_player",session.getSesstionInfo(),socket.id,true);
+        }
         //여기서 접속한 모든 사용자에게 해당 유저가 떠났음을 알려줘야 한다.
         SessionManager.Instance.broadcast("leave_player",session.getSesstionInfo(), socket.id, true);
     });
