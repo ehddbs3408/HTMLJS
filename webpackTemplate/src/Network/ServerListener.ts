@@ -4,7 +4,7 @@ import RoomManager from "../Server/RoomManager";
 import ServerMapManager from "../Server/ServerMapManager";
 import Session, { SessionStatus } from "../Server/Session";
 import SessionManager from "../Server/SessionManager";
-import { SessionInfo ,PlayerList, Iceball, HitInfo, DeadInfo, ReviveInfo, UserInfo, CreateRoom, EnterRoom, MsgBox} from "./Protocol";
+import { SessionInfo ,PlayerList, Iceball, HitInfo, DeadInfo, ReviveInfo, UserInfo, CreateRoom, EnterRoom, MsgBox, ChageTeam} from "./Protocol";
 
 //서버에서 소켓이 리스닝해야하는 이벤트를 여기서 다 등록
 export const addServerListener = (socket:Socket,session:Session) => 
@@ -53,6 +53,8 @@ export const addServerListener = (socket:Socket,session:Session) =>
          }
          else
          {
+            let newUser:UserInfo = {name:session.name,playerId:session.id}
+            room.broadcast("new_user",newUser,session.id,true);
             socket.emit("enter_room",room.serialize());
          }
       }
@@ -61,6 +63,17 @@ export const addServerListener = (socket:Socket,session:Session) =>
 
    socket.on("room_list",data =>{
       socket.emit("room_list",RoomManager.Instance.getAllRoomInfo());
+   });
+
+   socket.on("request_team",data =>{
+      let changeTeam = data as ChageTeam;
+      if(session.status != SessionStatus.INROOM){
+         socket.emit("msgbox",{msg:"올바르지 않은 접근"});
+         return;
+      }
+
+      session.team = changeTeam.team;
+      session.room?.broadcast("confirm_team",changeTeam,"none");
    });
 
    socket.on("enter",data=>{

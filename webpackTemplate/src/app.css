@@ -16,7 +16,7 @@
     height: 100%;
     display: flex;
     position: absolute;
-    left: -200%;
+    left: -0%;
     top: 0;
     transition: left 0.4s;
 }
@@ -263,6 +263,11 @@
     color: black;
     padding: 4px 12px;
     transition: all 0.3s;
+}
+#roomPage .user > .ready.on
+{
+    background-color: rgb(7, 112, 47);
+    color: #fff;
 }
 
 #roomPage .user > .ready:hover

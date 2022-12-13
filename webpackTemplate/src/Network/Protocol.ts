@@ -1,3 +1,5 @@
+import { SessionTeam } from "../Server/Session";
+
 export interface Position 
 {
     x:number;
@@ -78,4 +80,10 @@ export interface RoomInfo
 export interface MsgBox
 {
     msg:string;
+}
+
+export interface ChageTeam
+{
+    playerID: string;
+    team:SessionTeam;
 }

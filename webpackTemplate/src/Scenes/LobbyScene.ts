@@ -1,7 +1,8 @@
 import Phaser from "phaser";
 import SocketManager from "../Core/SocketManager";
 import TooltipHelper from "../Core/TooltipHelper";
-import { CreateRoom, EnterRoom, RoomInfo, UserInfo } from "../Network/Protocol";
+import { ChageTeam, CreateRoom, EnterRoom, RoomInfo, UserInfo } from "../Network/Protocol";
+import { SessionTeam } from "../Server/Session";
 import SessionManager from "../Server/SessionManager";
 
 export default class LobbyScene extends Phaser.Scene
@@ -157,12 +158,76 @@ export default class LobbyScene extends Phaser.Scene
 
         //여기에 roominfo에있는 유저리스트를 싹다 그려준다.
         console.log(roomInfo);
+        let listDiv =
+        this.UIdIV.querySelector(".waiting-row > .user-list") as HTMLDivElement;
+        listDiv.innerHTML  ="";
+        roomInfo.userList.forEach(u => {
+            let userHTML =
+            this.getUserHTML(u.name,u.playerId);
+            listDiv.appendChild(userHTML);
+            userHTML.addEventListener("click",e=>{
+                if(userHTML.classList.contains("my"))
+                {
+                    let readyDiv = userHTML.querySelector(".ready") as HTMLDivElement;
+                    readyDiv.classList.add("on");
+                }
+            });
+        });
+    }
+
+    getUserHTML(name:string,playerId:string) : HTMLDivElement
+    {
+        let div = document.createElement("div");
+        div.innerHTML  = `
+                <div data-id="${playerId}" class="user ${playerId == SocketManager.Instance.socket.id ? "my" : ""} ">
+                    <div class="name">${name}</div>
+                    <div class="ready">Ready</div>
+                </div>`;
         
+        return div.firstElementChild as HTMLDivElement;
     }
 
     setUpRoomPage():void
     {
         const redTeamDiv = document.querySelector(".team.red") as HTMLDivElement;
         const blueTeamDiv = document.querySelector(".team.blue") as HTMLDivElement;
+
+        redTeamDiv.addEventListener("click",e =>{
+            const me = this.UIdIV.querySelector(".my") as HTMLDivElement;
+            if(me == undefined) return;
+
+            let requsetTeam:ChageTeam = {
+                playerID:SocketManager.Instance.socket.id,
+                team:SessionTeam.RED
+            };
+            SocketManager.Instance.sendData("request_team",requsetTeam);
+            //redTeamDiv.querySelector(".list")?.appendChild(me);
+        });
+
+        blueTeamDiv.addEventListener("click",e=>{
+            const me = this.UIdIV.querySelector(".my") as HTMLDivElement;
+            if(me == undefined) return;
+
+            let requsetTeam:ChageTeam = {
+                playerID:SocketManager.Instance.socket.id,
+                team:SessionTeam.BLUE
+            };
+            SocketManager.Instance.sendData("request_team",requsetTeam);
+            blueTeamDiv.querySelector(".list")?.appendChild(me);
+        });
+    }
+
+    changeTeam(data:ChageTeam):void
+    {
+        let target =
+        this.UIdIV.querySelector(`[data-id='${data.playerID}']`) as HTMLDivElement;
+
+        if(data.team == SessionTeam.BLUE){
+            document.querySelector(".team.blue > .list")?.appendChild(target);
+        }
+        else if(data.team == SessionTeam.RED)
+        {
+            document.querySelector(".team.red > .list")?.appendChild(target);
+        }
     }
 }
