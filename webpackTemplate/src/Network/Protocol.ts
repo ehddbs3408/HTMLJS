@@ -77,6 +77,7 @@ export interface RoomInfo
     userCnt:number;
     maxCnt:number;
     isPlaying:boolean;
+    ownerId:string;
 }
 
 export interface MsgBox
@@ -88,4 +89,9 @@ export interface ChageTeam
 {
     playerID: string;
     team:SessionTeam;
+}
+
+export interface RoomReady
+{
+    ready:boolean;
 }

@@ -50,6 +50,7 @@ export default class Room
         }else
         {
             this.broadcast("leave_user",leaveUserinfo,socketId);
+            this.sessionMap[this.ownerID].send("room_ready",{ready:this.checkAllReady()});
         }
 
     }
@@ -95,8 +96,25 @@ export default class Room
             userCnt:this.count,
             maxCnt:this.maxCount,
             isPlaying:this.status == RoomStatus.RUNNING,
-            no:this.roomNo
+            no:this.roomNo,
+            ownerId:this.ownerID
         };
         return info;
+    }
+
+    checkAllReady():boolean
+    {
+        //양팀 선수가 다 있어야 한다.
+        let isReady : boolean = true;
+        for(let key in this.sessionMap)
+        {
+            if(this.sessionMap[key].isReady == false)
+            {
+                isReady = false;
+                break;
+            }
+        }
+
+        return isReady;
     }
 }

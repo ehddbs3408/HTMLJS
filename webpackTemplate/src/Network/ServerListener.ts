@@ -1,5 +1,6 @@
 import { Data } from "phaser";
 import { Socket } from "socket.io";
+import Room from "../Server/Room";
 import RoomManager from "../Server/RoomManager";
 import ServerMapManager from "../Server/ServerMapManager";
 import Session, { SessionStatus, SessionTeam } from "../Server/Session";
@@ -89,6 +90,10 @@ export const addServerListener = (socket:Socket,session:Session) =>
          session.isReady = !session.isReady;
          userinfo.isReady = session.isReady;
          session.room?.broadcast("user_ready",userinfo,session.id); //재전송.(본인 포함);
+
+         let room = session.room as Room;
+         room.sessionMap[room.ownerID].send("room_ready",{ready:room.checkAllReady()});
+         
       }else
       {
          socket.emit("msgbox",{msg:"팀을 먼저 선택해야 합니다."});

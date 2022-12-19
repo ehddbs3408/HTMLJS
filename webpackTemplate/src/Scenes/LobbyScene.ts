@@ -15,18 +15,26 @@ export default class LobbyScene extends Phaser.Scene
     listDiv : HTMLDivElement;
     redTeamDiv:HTMLDivElement;
     blueTeamDiv:HTMLDivElement;
+
+    titleDiv:HTMLDivElement;
+
+    startBtn:HTMLButtonElement;
     constructor()
     {
         super({key:"Lobby"});
         SocketManager.Instance.addLobbyProtocol(this);
         this.UIdIV = document.querySelector("#gameDiv") as HTMLCanvasElement;
         this.gameCanvas = document.querySelector("#theGame > canvas") as HTMLCanvasElement;
+        this.startBtn = document.querySelector("#btnStart") as HTMLButtonElement;
+
+        this.titleDiv = this.UIdIV.querySelector(".title-header")as HTMLDivElement
 
         this.listDiv = this.UIdIV.querySelector(".waiting-row > .user-list") as HTMLDivElement;
         this.redTeamDiv =document.querySelector(".team.red") as HTMLDivElement;
 
         this.blueTeamDiv = document.querySelector(".team.blue") as HTMLDivElement;
 
+        
         this.toolTip = new TooltipHelper();
 
         this.resizeUI(0);
@@ -40,6 +48,10 @@ export default class LobbyScene extends Phaser.Scene
     create():void
     {
         const sky = this.add.image(0,0,"bg_sky").setOrigin(0,0).setScale(4.5);
+
+        this.startBtn = 
+        document.querySelector("#btnStart") as HTMLButtonElement;
+        this.startBtn.style.visibility = "hidden";
     }
 
     resizeUI(time:number):void
@@ -165,6 +177,9 @@ export default class LobbyScene extends Phaser.Scene
         //여기에 roominfo에있는 유저리스트를 싹다 그려준다.
         console.log(roomInfo);
 
+        // let tilename = this.titleDiv.querySelector("#roomPage > ") as HTMLSpanElement;
+        // tilename.innerHTML = roomInfo.Name;
+
         this.listDiv.innerHTML  ="";
         roomInfo.userList.forEach(u => {
             this.createUser(u);
@@ -264,6 +279,12 @@ export default class LobbyScene extends Phaser.Scene
         }
     }
 
+    removeRoomUser(user:UserInfo):void
+    {
+        let target = this.UIdIV.querySelector(`[data-id='${user.playerId}']`) as HTMLDivElement;
+        target.remove();
+    }
+
     userReady(user:UserInfo):void
     {
         let target =
@@ -277,5 +298,10 @@ export default class LobbyScene extends Phaser.Scene
         {
             readyDiv?.classList.remove("on");
         }
+    }
+
+    setRoomReady(ready:boolean):void
+    {
+        this.startBtn.style.visibility = ready ? "visible" : "hidden";
     }
 }
