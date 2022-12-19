@@ -1,5 +1,5 @@
 import {Socket} from 'socket.io';
-import { Position, SessionInfo } from '../Network/Protocol';
+import { Position, SessionInfo, UserInfo } from '../Network/Protocol';
 import Room from './Room';
 
 export enum SessionStatus
@@ -26,7 +26,8 @@ export default class Session
     isMoving:boolean = false;
 
     status:SessionStatus = SessionStatus.CONNECTED;
-    team:SessionTeam = SessionTeam.RED;
+    team:SessionTeam = SessionTeam.NONE;
+    isReady:boolean = false;
 
     room:Room | null = null; //행당 세션이 속해있는 방을 기억한다.
 
@@ -68,5 +69,11 @@ export default class Session
         this.filpX = info.filpX;
         this.isMoving = info.isMoving;
         //그외의 정보를 여기서 셋팅
+    }
+
+    getUserInfo():UserInfo
+    {
+        let {name,id,isReady,team} = this;
+        return {name,playerId:id,team,isReady};
     }
 }

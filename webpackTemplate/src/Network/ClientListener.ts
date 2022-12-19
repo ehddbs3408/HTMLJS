@@ -35,8 +35,13 @@ export const addClientLobbyListener = (socket:Socket,scene:LobbyScene) =>{
 
     socket.on("new_user",data=>{
         let newuser = data as UserInfo;
-        //scene.addRoomUser(newuser);
+        scene.addRoomUser(newuser);
         //scene.getUserHTML(newuser.name,newuser.playerId);
+    });
+
+    socket.on("user_ready",data => {
+        let user = data as UserInfo;
+        scene.userReady(user);
     });
 }
 export const addClientGameListener = (socket:Socket,scene:PlayGameScene) =>{

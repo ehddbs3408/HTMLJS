@@ -2,7 +2,7 @@ import { Data } from "phaser";
 import { Socket } from "socket.io";
 import RoomManager from "../Server/RoomManager";
 import ServerMapManager from "../Server/ServerMapManager";
-import Session, { SessionStatus } from "../Server/Session";
+import Session, { SessionStatus, SessionTeam } from "../Server/Session";
 import SessionManager from "../Server/SessionManager";
 import { SessionInfo ,PlayerList, Iceball, HitInfo, DeadInfo, ReviveInfo, UserInfo, CreateRoom, EnterRoom, MsgBox, ChageTeam} from "./Protocol";
 
@@ -53,7 +53,7 @@ export const addServerListener = (socket:Socket,session:Session) =>
          }
          else
          {
-            let newUser:UserInfo = {name:session.name,playerId:session.id}
+            let newUser:UserInfo = session.getUserInfo();
             room.broadcast("new_user",newUser,session.id,true);
             socket.emit("enter_room",room.serialize());
          }
@@ -67,14 +67,34 @@ export const addServerListener = (socket:Socket,session:Session) =>
 
    socket.on("request_team",data =>{
       let changeTeam = data as ChageTeam;
+      
       if(session.status != SessionStatus.INROOM){
          socket.emit("msgbox",{msg:"올바르지 않은 접근"});
          return;
       }
 
+      if(session.isReady)
+      {
+         socket.emit("msgbox",{msg:"레디 상태에서 안됨"});
+      }
+
       session.team = changeTeam.team;
       session.room?.broadcast("confirm_team",changeTeam,"none");
    });
+
+   socket.on("user_ready",data=>{
+      let userinfo = data as UserInfo;
+      if(session.team != SessionTeam.NONE)
+      {
+         session.isReady = !session.isReady;
+         userinfo.isReady = session.isReady;
+         session.room?.broadcast("user_ready",userinfo,session.id); //재전송.(본인 포함);
+      }else
+      {
+         socket.emit("msgbox",{msg:"팀을 먼저 선택해야 합니다."});
+         return;
+      }
+   })
 
    socket.on("enter",data=>{
         let pos =ServerMapManager.Instance.getRandomSpawnPosition();

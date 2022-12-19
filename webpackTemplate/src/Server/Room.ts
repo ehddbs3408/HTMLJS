@@ -1,7 +1,8 @@
+import SocketManager from "../Core/SocketManager";
 import { RoomInfo, UserInfo } from "../Network/Protocol";
 import { RoomStatus } from "./RoomManager";
 import Session, { SessionStatus } from "./Session";
-import { SessionMap } from "./SessionManager";
+import SessionManager, { SessionMap } from "./SessionManager";
 
 export default class Room
 {
@@ -38,14 +39,19 @@ export default class Room
         this.sessionMap[socketId].setRoom(null);
         this.sessionMap[socketId].status = SessionStatus.LOBBY;
         this.count--; //한명감소
+
+        let leaveUserinfo = this.sessionMap[socketId].getUserInfo();
         delete this.sessionMap[socketId];
         if(socketId == this.ownerID)
         {
             console.log(`방장이 나갔습니다. ${this.roomNo}를 폐쇄합니다`);
             this.count = 0;
             this.kickAllUser();
-            
+        }else
+        {
+            this.broadcast("leave_user",leaveUserinfo,socketId);
         }
+
     }
 
     kickAllUser():void
@@ -76,7 +82,7 @@ export default class Room
         for(let key in this.sessionMap)
         {
             let s= this.sessionMap[key];
-            list.push({name:s.name,playerId:s.id});
+            list.push(s.getUserInfo());
         }
         return list;
     }

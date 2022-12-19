@@ -55,6 +55,8 @@ export interface UserInfo
 {
     name:string;
     playerId:string;
+    team?:SessionTeam;
+    isReady?:boolean;
 }
 export interface CreateRoom
 {
