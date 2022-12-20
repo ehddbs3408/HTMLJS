@@ -99,7 +99,28 @@ export const addServerListener = (socket:Socket,session:Session) =>
          socket.emit("msgbox",{msg:"팀을 먼저 선택해야 합니다."});
          return;
       }
-   })
+   });
+
+   socket.on("leave_room",()=>{
+      if(session.room != null)
+      {
+         RoomManager.Instance.leaveRoom(session);
+      }
+
+      socket.emit("goto_lobby");
+      socket.emit("room_list",RoomManager.Instance.getAllRoomInfo());
+   });
+
+   socket.on("start_room",()=>{
+      if(session.room == null || session.room.checkAllReady() == false)
+      {
+         let msg:MsgBox = {msg:"모든 구성원이 준비되지 않음"};
+         socket.emit("msgbox",msg);
+         return;
+      }
+
+      session.room.startGame();
+   });
 
    socket.on("enter",data=>{
         let pos =ServerMapManager.Instance.getRandomSpawnPosition();

@@ -1,6 +1,6 @@
 import SocketManager from "../Core/SocketManager";
 import { RoomInfo, UserInfo } from "../Network/Protocol";
-import { RoomStatus } from "./RoomManager";
+import RoomManager, { RoomStatus } from "./RoomManager";
 import Session, { SessionStatus } from "./Session";
 import SessionManager, { SessionMap } from "./SessionManager";
 
@@ -36,8 +36,7 @@ export default class Room
 
     leaveRoom(socketId:string):void
     {
-        this.sessionMap[socketId].setRoom(null);
-        this.sessionMap[socketId].status = SessionStatus.LOBBY;
+        this.sessionMap[socketId].resetToLobby();
         this.count--; //한명감소
 
         let leaveUserinfo = this.sessionMap[socketId].getUserInfo();
@@ -60,8 +59,7 @@ export default class Room
         this.broadcast("leave-owner",{},"none");
         for(let key in this.sessionMap)
         {
-            this.sessionMap[key].setRoom(null);
-            this.sessionMap[key].status = SessionStatus.LOBBY;
+            this.sessionMap[key].resetToLobby();
         }
         this.sessionMap = {};
         this.count = 0;
@@ -116,5 +114,15 @@ export default class Room
         }
 
         return isReady;
+    }
+
+    startGame():void
+    {
+        this.status = RoomStatus.RUNNING;
+        for(let key in this.sessionMap)
+        {
+            this.sessionMap[key].status = SessionStatus.PLAYING;
+            this.sessionMap[key].send("game_start",this.sessionMap[key].getUserInfo());
+        }
     }
 }

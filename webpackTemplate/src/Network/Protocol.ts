@@ -13,6 +13,7 @@ export interface SessionInfo
     position:Position;
     filpX:boolean;
     isMoving:boolean;
+    team?:SessionTeam;
 }
 
 export interface PlayerList

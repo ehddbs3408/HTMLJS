@@ -3,9 +3,14 @@ import SocketManager from "../Core/SocketManager";
 import ProjectilePool from "../GameObjects/Pools/ProjectilePool";
 import LobbyScene from "../Scenes/LobbyScene";
 import PlayGameScene from "../Scenes/PlayGameScene";
-import { ChageTeam, DeadInfo, EnterRoom, HitInfo, Iceball, PlayerList,Position,ReviveInfo,RoomInfo,RoomReady,SessionInfo, UserInfo } from "./Protocol";
+import { ChageTeam, DeadInfo, EnterRoom, HitInfo, Iceball, MsgBox, PlayerList,Position,ReviveInfo,RoomInfo,RoomReady,SessionInfo, UserInfo } from "./Protocol";
 
 export const addClientLobbyListener = (socket:Socket,scene:LobbyScene) =>{
+    socket.on("msgbox",data => {
+        let msgBox = data as MsgBox;
+        alert(msgBox.msg);
+    })
+    
     socket.on("login_confirm",data=>{
         
         let userInfo = data as UserInfo;
@@ -14,6 +19,12 @@ export const addClientLobbyListener = (socket:Socket,scene:LobbyScene) =>{
         scene.gotoLobby();
         socket.emit("room_list",{});
         console.log("go to lobby");
+    });
+
+    socket.on("goto_lobby",()=>{
+
+        scene.gotoLobby();
+        //socket.emit("room_list",{});
     });
 
     socket.on("enter_room",data=>{
@@ -50,6 +61,16 @@ export const addClientLobbyListener = (socket:Socket,scene:LobbyScene) =>{
         
         scene.removeRoomUser(user);
     });
+
+    socket.on("leave-owner",()=>{
+        scene.gotoLobby();
+        socket.emit("room_list");
+    });
+
+    socket.on("game_start",data=>{
+        let sessionInfo = data as SessionInfo;
+        scene.gameStart(sessionInfo);
+    })
 
     socket.on("room_ready",data=>{
         let roomReady = data as RoomReady;

@@ -1,6 +1,6 @@
 import { RoomInfo } from "../Network/Protocol";
 import Room from "./Room";
-import Session from "./Session";
+import Session, { SessionTeam } from "./Session";
 
 export enum RoomStatus {
     IDLE = 1,
@@ -32,6 +32,8 @@ export default class RoomManager
         let r:Room = session.room as Room;
         r.leaveRoom(session.id);
 
+        session.resetToLobby();
+        
         if(r.count == 0)
         {
             delete this.roomMap[r.roomNo];

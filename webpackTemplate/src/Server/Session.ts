@@ -60,7 +60,7 @@ export default class Session
 
     getSesstionInfo():SessionInfo
     {
-        return {id:this.id,name:this.name,position:this.position,filpX:this.filpX,isMoving:this.isMoving};
+        return {id:this.id,name:this.name,position:this.position,filpX:this.filpX,isMoving:this.isMoving,team:this.team};
     }
 
     setInfo(info:SessionInfo):void
@@ -75,5 +75,13 @@ export default class Session
     {
         let {name,id,isReady,team} = this;
         return {name,playerId:id,team,isReady};
+    }
+
+    resetToLobby():void
+    {
+        this.status = SessionStatus.LOBBY;
+        this.isReady = false;
+        this.team = SessionTeam.NONE;
+        this.room = null;
     }
 }
