@@ -4,6 +4,6 @@
 
 How to execution the game
 
-On Commend Window =>
+On Command Window =>
  - npm install
  - npm run watch
