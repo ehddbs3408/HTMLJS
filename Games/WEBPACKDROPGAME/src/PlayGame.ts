@@ -200,8 +200,9 @@ export class PlayGameScene extends Phaser.Scene {
         pList.forEach(p => {
             if(p.y + this.gameHeigth < this.player.y && this.gameOver == true)
             {
+                this.gameOver = false
                 this.displayGameOverScreen()
-                // this.scene.start("PlayGame");
+                
             }
 
             
@@ -222,7 +223,13 @@ export class PlayGameScene extends Phaser.Scene {
             }
         });
     }
+
     displayGameOverScreen():void
+    {
+        //GameOverPanel
+    }
+
+    reStartGame() :void
     {
         
     }
@@ -287,6 +294,7 @@ export class PlayGameScene extends Phaser.Scene {
     {
         this.player.die(multiplier);
 
+        this.gameOver = true;
         this.time.addEvent({
             delay:800,
             callback:()=>this.actionCam.stopFollow()
