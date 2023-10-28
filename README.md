@@ -1,5 +1,5 @@
 # HTMLJS
-How to execution the game /n
+How to execution the game:
 On Commend Window =>
  - npm install
  - npm run watch
