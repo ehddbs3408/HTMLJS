@@ -43,8 +43,8 @@ export default class PlayGameScene extends Phaser.Scene {
 
     placeOnPlatform(p:PlatformSprite):void
     {
+        console.log("Create Enemy");
         let e = new EnemySrite(this,p,this.enemyGroup);
-
     }
 
     handleCollision(body1:Phaser.GameObjects.GameObject, body2: Phaser.GameObjects.GameObject): void
@@ -52,7 +52,7 @@ export default class PlayGameScene extends Phaser.Scene {
         let player: PlayerSprite = body1 as PlayerSprite;
         let platform: PlatformSprite = body2 as PlatformSprite;
 
-        console.log("플레이어 착지");
+        //console.log("플레이어 착지");
     }
 
     handleEnemyCollision(body1:Phaser.GameObjects.GameObject, body2: Phaser.GameObjects.GameObject) : void
@@ -77,9 +77,9 @@ export default class PlayGameScene extends Phaser.Scene {
 
     resetPlatform(platform:PlatformSprite) : void
     {
-        
         let option:PlatformInitOption = this.platformGroup.getPlatformInitOption(false);
         platform.init(option);
+        this.placeOnPlatform(platform);
     }
 
     startMove() : void
